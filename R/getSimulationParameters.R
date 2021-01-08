@@ -1,7 +1,7 @@
 # Compute summary statistics of the scRNA-Seq dataset that will later be used to compute simulation parameters
 .getSumStats <- function(object, clustering){
 
-    counts <- as.data.frame(object@assays@data[[1]])
+    counts <- as.data.frame(as.matrix(object@assays@data[[1]]))
     nclust <- length(levels(as.factor(object[[clustering]])))
 
     computevar <- function(x){tapply(x, object[[clustering]], function(a){stats::var(a[a != 0])})}
