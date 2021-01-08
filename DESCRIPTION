@@ -1,11 +1,36 @@
 Package: GEEutils
 Type: Package
-Title: What the Package Does (Title Case)
-Version: 0.1.0
-Author: Who wrote it
-Maintainer: The package maintainer <yourself@somewhere.net>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
-License: What license is it under?
+Title: Aggregation of utility functions for working with Generalized Estimation Equations
+Date: 2021-01-08
+Version: 0.99.0
+Authors@R: person("Jeroen", "Gilis", role = c("aut","cre"),
+                     email = "jeroen.gilis@ugent.be")
+Description: Aggregation of utility functions for working with Generalized Estimation Equations.
+Depends: R (>= 4.0)
+Imports: SummarizedExperiment,
+	 scater,
+	 ggplot2,
+	 Matrix,
+	 stats
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat,
+    covr,
+    BiocStyle
+VignetteBuilder: knitr
+Collate:'getNoCor.R' 'runDimRed.R'
+License: Artistic-2.0
+URL: https://github.com/jgilis/GEEutils
 Encoding: UTF-8
-LazyData: true
+LazyData: false
+RoxygenNote: 7.1.1
+biocViews:
+    Regression,
+    DifferentialExpression,
+    GeneExpression,
+    RNASeq,
+    Software,
+    SingleCell,
+    Transcriptomics,
+    MultipleComparison
