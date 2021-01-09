@@ -11,6 +11,7 @@ Imports: SummarizedExperiment,
 	 scater,
 	 ggplot2,
 	 Matrix,
+	 fitdistrplus,
 	 stats
 Suggests:
     knitr,

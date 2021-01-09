@@ -1,7 +1,7 @@
 # Calculate the modified GEE variance estimator proposed by Kauermann and Carroll (2001).
-.bakery_KC <- function(gee.fit){
+.bakery_KC <- function(gee.fit, data, mat, corstr){
 
-    ##### if this part turns out to be identical for all extraSandwich, consider moving it to a function .Bakery_preprocess
+    ##### if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
     beta_est <- gee.fit$coefficient
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
@@ -71,9 +71,9 @@
 
 
 # Calculate the modified GEE variance estimator proposed by Pan (2001).
-.bakery_Pan <- function(gee.fit){
+.bakery_Pan <- function(gee.fit, data, mat, corstr){
 
-    ##### if this part turns out to be identical for all extraSandwich, consider moving it to a function .Bakery_preprocess
+    ##### if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
     beta_est <- gee.fit$coefficient
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
@@ -213,16 +213,16 @@ bakery <- function(formula, id, data, family, corstr, silent = TRUE, extraSandwi
                    corstr = corstr,
                    silent = silent)
 
-    if(extraSandwich == "none"){
+    if("none" %in% extraSandwich){
         return(gee.fit)
     }
 
     if("KC" %in% extraSandwich){
-        gee.fit$KC.variance <- .Bakery_KC(gee.fit)
+        gee.fit$KC.variance <- .bakery_KC(gee.fit, data, mat, corstr)
     }
 
     if("Pan" %in% extraSandwich){
-        gee.fit$Pan.variance <- .Bakery_Pan(gee.fit)
+        gee.fit$Pan.variance <- .bakery_Pan(gee.fit, data, mat, corstr)
     }
     return(gee.fit)
 }

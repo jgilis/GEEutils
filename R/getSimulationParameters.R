@@ -36,7 +36,7 @@
     sumStats <- sumStats[which(sumStats$GrandMean > 0),]
     sumStats <- sumStats[which(sumStats$DropOut > 0),]
 
-    temp.fit.gamma <- suppressWarnings(fitdist(sumStats$DropOut, "gamma", method="mle"))
+    temp.fit.gamma <- suppressWarnings(fitdistrplus::fitdist(sumStats$DropOut, "gamma", method="mle"))
     drop.shape <- temp.fit.gamma$estimate[1]
     drop.rate <- temp.fit.gamma$estimate[2]
 
@@ -69,7 +69,7 @@
 
     sumStats <- sumStats[which(sumStats$GrandMean > 0),]
 
-    temp.fit.gamma <- suppressWarnings(fitdist(sumStats$GrandMean, "gamma", method="mle"))
+    temp.fit.gamma <- suppressWarnings(fitdistrplus::fitdist(sumStats$GrandMean, "gamma", method="mle"))
     grandmean.shape <- temp.fit.gamma$estimate[1]
     grandmean.rate <- temp.fit.gamma$estimate[2]
 
@@ -192,6 +192,7 @@
 #' @author Jeroen Gilis
 #'
 #' @import ggplot2
+#' @importFrom fitdistrplus fitdist
 #'
 #' @export
 
