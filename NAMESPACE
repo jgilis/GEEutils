@@ -3,6 +3,7 @@
 export(bakery)
 export(getNoCor)
 export(getSimulationParameters)
+export(glm.Waldtest)
 export(runDimRed)
 export(simulator)
 import(gee)
