@@ -17,10 +17,6 @@ A `ggplot` object.
 \description{
 Visualize inter- and intra-individual correlations by means of boxplots
 }
-\examples{
-TO DO
-
-}
 \author{
 Jeroen Gilis
 }

@@ -22,10 +22,6 @@ A `list` 10 parameters that can be used to simulate synthetic scRNA-Seq datasets
 \description{
 Extract parameters from a scRNA-Seq dataset that are relevant for simulating synthetic asRNA-Seq data.
 }
-\examples{
-TO DO
-
-}
 \author{
 Jeroen Gilis
 }

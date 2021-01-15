@@ -183,8 +183,6 @@
 #'
 #' @param verbose `Logical` TRUE or FALSE; should progress be printed?
 #'
-#' @examples TO DO
-#'
 #' @return A `list` 10 parameters that can be used to simulate synthetic scRNA-Seq datasets
 #'
 #' @rdname getSimulationParameters

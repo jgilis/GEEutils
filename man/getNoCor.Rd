@@ -24,10 +24,6 @@ A new `matrix` or `SingleCellExperiment` instance
 \description{
 Retain only uncorrelated features from a count matrix
 }
-\examples{
-TO DO
-
-}
 \author{
 Jeroen Gilis
 }

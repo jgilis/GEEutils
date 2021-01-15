@@ -40,10 +40,6 @@ A `matrix` of simulated gene expression data.
 \description{
 Simulate a synthetic scRNA-Seq dataset based on parameters obtained with getSimulationParameters
 }
-\examples{
-TO DO
-
-}
 \author{
 Jeroen Gilis
 }

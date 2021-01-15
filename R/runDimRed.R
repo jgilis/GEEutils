@@ -22,8 +22,6 @@
 #' @param downsample Should there be a downsampling of the number of cells per cluster in the plot?
 #'  Either `logical` FALSE if no downsampling is desired or a `numeric` indicating the maximum number of cells per cluster.
 #'
-#' @examples TO DO
-#'
 #' @return Prints the dimensionality reduced plot directly to console.
 #'
 #' @rdname runDimRed

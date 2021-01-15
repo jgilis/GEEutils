@@ -13,8 +13,6 @@
 #'
 #' @param cutoff A `numeric value` between 0 and 1, indicating the maximum allowed correlation between the returned features. Defaults to 0.25.
 #'
-#' @examples TO DO
-#'
 #' @return A new `matrix` or `SingleCellExperiment` instance
 #'
 #' @rdname getNoCor

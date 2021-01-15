@@ -58,8 +58,6 @@
 #' @param adjust A `logical` variable; should a finite sample adjustment be made?
 #'  This amounts to multiplication with n/(n-k) where n is the number of observations and k the number of estimated parameters.
 #'
-#' @examples TO DO
-#'
 #' @return A `Dataframe` containing the requested model parameter estimates, (robust) standard errors, degrees of freedom,
 #'  Wald test statistics and p-values.
 #'

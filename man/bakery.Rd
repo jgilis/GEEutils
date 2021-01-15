@@ -42,10 +42,6 @@ An object of class "gee" including multiple sandwich estimators.
 \description{
 Compute robust standard error estimates using multiple sandwich strategies
 }
-\examples{
-TO DO
-
-}
 \author{
 Jeroen Gilis
 }

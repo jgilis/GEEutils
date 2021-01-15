@@ -43,8 +43,6 @@
 #'
 #' @param clustering A `character` string indicating from which individual each cells originates
 #'
-#' @examples TO DO
-#'
 #' @return A `ggplot` object.
 #'
 #' @rdname correlationsBoxplot

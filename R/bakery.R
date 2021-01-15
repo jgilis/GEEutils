@@ -172,8 +172,6 @@
 #'  additional to the model standard error and the robust estimator from Liang and Zeger. The following are permitted: "KC" and "Pan".
 #'  If not specified or set to "none", only the model standard error and the robust estimator from Liang and Zeger will be provided.
 #'
-#' @examples TO DO
-#'
 #' @return An object of class "gee" including multiple sandwich estimators.
 #'
 #' @rdname bakery

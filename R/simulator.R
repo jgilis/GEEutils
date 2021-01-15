@@ -21,8 +21,6 @@
 #' @param foldchange A `numeric` indicating the size of differential expression in terms of a fold change.
 #' Defaults to 1 (not differentially expressed, mock dataset).
 #'
-#' @examples TO DO
-#'
 #' @return A `matrix` of simulated gene expression data.
 #'
 #' @rdname simulator

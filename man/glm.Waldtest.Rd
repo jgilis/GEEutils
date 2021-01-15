@@ -24,10 +24,6 @@ A `Dataframe` containing the requested model parameter estimates, (robust) stand
 \description{
 Perform a Wald test on a glm with the possible of adopting robust standard errors
 }
-\examples{
-TO DO
-
-}
 \author{
 Jeroen Gilis
 }

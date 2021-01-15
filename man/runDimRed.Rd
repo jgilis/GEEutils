@@ -25,10 +25,6 @@ Prints the dimensionality reduced plot directly to console.
 \description{
 Wrapper function to produce a pretty dimensionality reduction plot
 }
-\examples{
-TO DO
-
-}
 \author{
 Jeroen Gilis
 }
