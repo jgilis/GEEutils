@@ -20,7 +20,11 @@ Imports: SummarizedExperiment,
     	 magrittr,
 	 dplyr,
     	 scater,
-	 gdata
+	 gdata,
+	 geepack,
+	 geeM,
+	 geesmv,
+	 sandwich
 Suggests:
     knitr,
     rmarkdown,
