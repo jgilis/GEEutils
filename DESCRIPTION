@@ -21,7 +21,7 @@ Suggests:
     BiocStyle
 VignetteBuilder: knitr
 Collate:'getNoCor.R' 'runDimRed.R' 'getSimulationParameters.R' 'simulator.R' 'bakery.R'
-        'glm.Waldtest.R'
+        'glm.Waldtest.R' 'correlationsBoxplot.R'
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
 Encoding: UTF-8
