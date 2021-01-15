@@ -23,7 +23,8 @@ Imports: SummarizedExperiment,
 	 gdata,
 	 geepack,
 	 geeM,
-	 geesmv
+	 geesmv,
+	 sandwich
 Suggests:
     knitr,
     rmarkdown,
