@@ -12,7 +12,10 @@ Imports: SummarizedExperiment,
 	 ggplot2,
 	 Matrix,
 	 fitdistrplus,
-	 stats
+	 stats,
+	 gee,
+	 matrixcalc,
+	 purrr
 Suggests:
     knitr,
     rmarkdown,
