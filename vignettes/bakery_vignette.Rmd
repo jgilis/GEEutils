@@ -1,0 +1,311 @@
+---
+title: "bakery_vignette"
+output: rmarkdown::html_vignette
+author: "Jeroen Gilis"
+date: "09/01/2020"
+vignette: >
+  %\VignetteIndexEntry{bakery_vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Here I demonstrate the `bakery` function of GEEutils. The goal of `bakery` is to allow for specifying multiple methods for computing robust standard errors. By default, `bakery` adopts the robust standard error (sandwich) method introduce by [Liang and Zeger](https://doi.org/10.1093/biomet/73.1.13) in 1986. In addition, bakery currently allows for specifying two additional sandwich estimation procedures:
+
+- The sandwich estimator of [Kauermann and Carroll](https://doi.org/10.1198/016214501753382309) (KC).
+
+- The sandwich estimator of [Pan](https://doi.org/10.1093/biomet/88.3.901) (Pan).
+
+These estimators, along with several others, have already been implemented in R in the package [geesmv](https://cran.r-project.org/web/packages/geesmv/index.html). However, the different sandwich estimation procedures from `geesmv` requires refitting the GEE model, which, at least for the `KC` and `Pan` estimators, is unnecessary. As refitting the GEE models can be slow in the contexxt of scRNA-Seq data, I have written `bakery` to avoid spurious computations.
+
+# Install GEEutils
+
+```
+devtools::install_local("/Users/jg/Desktop/PhD/GEE/GEEutils", force = T, quiet = F)
+```
+
+# Load libraries
+
+```{r, message=FALSE, warning=FALSE}
+library(GEEutils)
+library(geepack)
+library(geeM)
+library(geesmv)
+library(gee)
+library(sandwich)
+```
+
+# Create data
+
+I simply create a single Poisson distributed random variable for demonstration purposes.
+
+Note: 10 clusters of size 50 is the minimal #number of clusters and cluster size in [Li and Redden]( https://doi.org/10.1002/sim.6344)
+
+```{r}
+set.seed(77)
+gene1 <- rpois(500,3)
+group_id <- rep(c("control", "treat"), each=250)
+patient_id <- rep(paste0("patient", 1:10),each=50)
+
+data <- as.data.frame(cbind(gene1,group_id,patient_id))
+data$gene1 <- as.numeric(data$gene1)
+data$group_id <- as.factor(data$group_id)
+data$patient_id <- as.factor(data$patient_id)
+```
+
+# Fit GEE 
+
+## GEE with GEEpack
+
+```{r}
+m1 <- geese(
+  formula = gene1 ~ group_id,
+  id = patient_id,
+  family = poisson,
+  data = data,
+  corstr = "exch")
+
+m1$beta # estimates
+sqrt(diag(m1$vbeta.naiv)) # SE
+sqrt(diag(m1$vbeta)) # sandwich SE
+```
+
+## GEE with gee
+
+```{r,message=FALSE}
+m2 <- gee(
+  formula = gene1 ~ group_id,
+  id = patient_id,
+  data = data,
+  family = poisson,
+  corstr = "exchangeable")
+
+m2$coefficients # estimates
+sqrt(diag(m2$naive.variance)) # SE --> different from geese, but same as geeM with default useP
+sqrt(diag(m2$robust.variance)) # sandwich SE --> same
+```
+
+## GEE with geeM
+
+Last but not least, we fit the GEE with the R package [geeM](https://cran.r-project.org/web/packages/geeM/index.html). geeM is unique in that it implements the GEE procedure fully in R. According to their publication, this did not have a severe impact on scalability [geeM paper](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4289620/).
+
+The abstract summarizes how this was achieved: [...] geeM, which is implemented entirely in R and allows for user specified link and variance functions. The sparse matrix representations provided in the Matrix package enable a fast implementation. To gain speed, we make use of analytic inverses of the working correlation when possible and a trick to find quick numeric inverses when an analytic inverse is not available. Through three examples, we demonstrate the speed of geeM, which is not much worse than C implementations like geepack and gee on small data sets and **faster on large data sets**.
+
+Note: I do have two concers with this method;
+
+- Stability towards sparse data
+
+- Scalability in terms of memory usage (stacking matrices in stead of summing)
+
+These were assessed in the paper but in another context.
+
+```{r}
+m3 <- geem(
+  formula = gene1 ~ group_id,
+  id = patient_id,
+  family = poisson,
+  corstr = "exch",
+  useP = T)
+
+m3$beta # estimates
+sqrt(diag(m3$naiv.var)) # SE --> different from geese, but same if useP = FALSE (TRUE is default though)
+sqrt(diag(m3$var)) # sandwich SE --> same
+```
+
+# Compute sandwich using geesmv
+
+Note; geesmv uses the gee package for fitting the GEE model with the sandwich estimator of Liang and Zeger as a default.
+
+## Liang and Zeger (LZ)
+
+```{r,message=FALSE}
+lz.exch <- GEE.var.lz(formula = gene1 ~ group_id,
+                        id="patient_id",
+                        family="poisson",
+                        data=data,
+                        corstr="exchangeable") ##Exchangeable correlation structure;
+
+sqrt(lz.exch$cov.beta) # same sandwich SE (Liang and zeger)
+```
+
+## Pan (Pan)
+
+```{r,message=FALSE}
+pan.exch <- GEE.var.pan(formula = gene1 ~ group_id,
+                        id="patient_id",
+                        family="poisson",
+                        data=data,
+                        corstr="exchangeable") ##Exchangeable correlation structure;
+
+sqrt(pan.exch$cov.beta) # different SE --> same as model SE?? --> probably because Exch + all clusters same size
+```
+
+## Kauermann and Carroll (KC)
+
+```{r,message=FALSE}
+kc.exch <- GEE.var.kc(formula = gene1 ~ group_id,
+                      id="patient_id",
+                      family="poisson",
+                      data=data,
+                      corstr="exchangeable") ##Exchangeable correlation structure;
+
+sqrt(kc.exch$cov.beta) # different SE
+```
+
+# bakery
+
+Since I would be very much interested in porting the work from [Li and Redden]( https://doi.org/10.1002/sim.6344) and [Rogers and Stoner](https://pubmed.ncbi.nlm.nih.gov/26998504/), who assessed the suitability of different sandwich estimators on (rare-event) binomial data. 
+
+In this context, it would be nice to have a wrapper / convenience function for GEEs. Note that with geesmv, we always need to refit the entire GEE, which is inefficient. Luckily, as both geeM as the sandwich part of geesmv are written entirily in R, we can easily write a convenience function that e.g. fits a gee with LZ, and can than compute alternative standard errors without refitting the GEE.
+
+For our application, it would suffice to do this for a poisson link GEE only.
+
+```{r, message=FALSE}
+test <- GEEutils::bakery(formula = gene1 ~ group_id,
+         id="patient_id",
+         data=data,
+         family="poisson",
+         corstr="exchangeable",
+         silent = TRUE,
+         extraSandwich = c("KC","Pan"))
+```
+
+```{r}
+unname(sqrt(diag(test$robust.variance))) # LZ
+sqrt(diag(test$KC.variance)) # KC
+sqrt(diag(test$Pan.variance)) # Pan
+```
+
+Check if correct
+
+```{r}
+sqrt(lz.exch$cov.beta)
+sqrt(kc.exch$cov.beta)
+sqrt(pan.exch$cov.beta)
+```
+
+# A Wald sandwich, please
+
+Adopting the sandwich package in a helper function that tests provided contrasts in `glm` (i.e., not `GEE`) models. In the example above, we only have 1 contrast to be tested, which translates into
+
+```{r}
+pois.model <- glm(gene1 ~ group_id, family = poisson, data = data)
+
+# regular SEs
+summary(pois.model)$coefficients[,2]
+```
+
+```{r}
+# sandwich SEs with sandwich function
+sqrt(diag(sandwich(pois.model)))
+```
+
+```{r}
+# GEEutils
+
+## Requires a contrast matrix (could set a default coefficient if not provided)
+design <- model.matrix(~ group_id, data = data)
+L <- matrix(0, ncol = 1, nrow = ncol(design))
+rownames(L) <- colnames(design)
+L["group_idtreat",1] <- 1
+
+# no sandwich
+pois.res <- GEEutils::glm.Waldtest(
+                models =  list(pois.model), 
+                contrast = L[,1], 
+                sandwich = FALSE, 
+                adjust = FALSE)
+pois.res$se
+
+# LZ sandwich
+pois.res <- GEEutils::glm.Waldtest(
+                models =  list(pois.model), 
+                contrast = L[,1], 
+                sandwich = TRUE, 
+                adjust = FALSE)
+pois.res$se
+
+# LZ sandwich adjusted for small sample size
+pois.res <- GEEutils::glm.Waldtest(
+                models =  list(pois.model), 
+                contrast = L[,1], 
+                sandwich = TRUE, 
+                adjust = TRUE)
+
+pois.res$se
+```
+
+Note that the `glm.Waldtest` function is flexible towards "multi-contrast" settings. I demonstrate this using new simulated data, mimicking a multi-patient multi-celltype setting.
+
+```{r}
+set.seed(77)
+gene1 <- c(rpois(500,3), rpois(500,2), rpois(500,4))
+group_id <- rep(c("control", "treat"), each=750)
+patient_id <- rep(paste0("patient", 1:10),each=150)
+cell_type <- rep(rep(c("type1", "type2", "type3"),each=50),10)
+
+data <- as.data.frame(cbind(gene1,group_id,patient_id,cell_type))
+data$gene1 <- as.numeric(data$gene1)
+data$group_id <- as.factor(data$group_id)
+data$patient_id <- as.factor(data$patient_id)
+data$cell_type <- as.factor(data$cell_type)
+```
+
+```{r}
+pois.model <- glm(gene1 ~ group_id*cell_type, family = poisson, data = data)
+summary(pois.model)
+```
+
+```{r}
+# contrast matrix
+design <- model.matrix(~ group_id*cell_type, data = data)
+L <- matrix(0, ncol = 3, nrow = ncol(design))
+rownames(L) <- colnames(design)
+L["group_idtreat",1:3] <- 1
+L["group_idtreat:cell_typetype2",2] <- 1 
+L["group_idtreat:cell_typetype3",3] <- 1
+colnames(L) <- c("type1", "type2", "type3")
+L
+```
+
+```{r}
+# no sandwich
+pois.res <- lapply(seq_len(ncol(L)), function(i){
+    GEEutils::glm.Waldtest(models=list(pois.model),
+                 contrast=L[,i],
+                 sandwich=FALSE)
+})
+unlist(pois.res)[c(2,7,12)]
+
+# LZ sandwich
+pois.res <- lapply(seq_len(ncol(L)), function(i){
+    GEEutils::glm.Waldtest(models = list(pois.model),
+                 contrast = L[,i],
+                 sandwich = TRUE,
+                 adjust = FALSE)
+})
+unlist(pois.res)[c(2,7,12)]
+
+# LZ sandwich adjusted for small sample size
+pois.res <- lapply(seq_len(ncol(L)), function(i){
+    GEEutils::glm.Waldtest(models = list(pois.model),
+                 contrast = L[,i],
+                 sandwich = TRUE,
+                 adjust = TRUE)
+})
+unlist(pois.res)[c(2,7,12)]
+```
+
+
+
+
+
+
+
+
