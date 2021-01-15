@@ -36,26 +36,11 @@ devtools::install_local("/Users/jg/Desktop/PhD/GEE/GEEutils", force=TRUE, quiet 
 
 ```{r, message=FALSE, warning=FALSE}
 suppressPackageStartupMessages({
-    library(GEEutils)
-    library(ggplot2)
-    library(fitdistrplus)
-    library(MASS)
-    library(tidyr)
-    library(gdata)
-    library(Seurat)
-    library(data.table)
-    library(EnvStats)
-    library(sn)
-    library(scater)
-    library(dplyr)
-    library(Matrix)
-    library(purrr)
-    library(tibble)
-    library(Matrix.utils)
     library(ExperimentHub)
     library(magrittr)
-    library(muscat)
-    library(countsimQC)
+    library(dplyr)
+    library(scater)
+    library(gdata)
 })
 ```
 
@@ -71,9 +56,7 @@ eh <- ExperimentHub()
 ```{r}
 # remove multiplets
 sce <- sce[, sce$multiplets == "singlet" & !is.na(sce$cell)]
-```
 
-```{r}
 # Arrange colData
 colData(sce) %>%
    as.data.frame %>%
@@ -85,10 +68,7 @@ colData(sce) %>%
    mutate_all(as.factor) %>%
    set_rownames(colnames(sce)) %>%
    DataFrame -> colData(sce)
-head(colData(sce))
-```
 
-```{r}
 # remove undetected genes
 sce[rowSums(counts(sce) > 0) > 0, ]
 

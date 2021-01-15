@@ -15,7 +15,12 @@ Imports: SummarizedExperiment,
 	 stats,
 	 gee,
 	 matrixcalc,
-	 purrr
+	 purrr,
+	 ExperimentHub,
+    	 magrittr,
+	 dplyr,
+    	 scater,
+	 gdata
 Suggests:
     knitr,
     rmarkdown,
