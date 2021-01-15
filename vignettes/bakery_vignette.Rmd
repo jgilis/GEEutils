@@ -1,5 +1,5 @@
 ---
-title: "bakery_vignette"
+title: "GEEutils: a bakery for extra sandwiches"
 output: rmarkdown::html_vignette
 author: "Jeroen Gilis"
 date: "09/01/2020"
