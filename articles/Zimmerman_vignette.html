@@ -253,42 +253,42 @@
 #&gt; Warning: Removed 36 rows containing missing values (geom_point).
 #&gt; Hyperparameters realtionship 2</code></pre>
 <p><img src="Zimmerman_vignette_files/figure-html/unnamed-chunk-9-5.png" width="700"><img src="Zimmerman_vignette_files/figure-html/unnamed-chunk-9-6.png" width="700"></p>
-<pre><code>#&gt; Warning: Removed 18 rows containing non-finite values (stat_smooth).
-#&gt; Warning: Removed 18 rows containing missing values (geom_point).
+<pre><code>#&gt; Warning: Removed 16 rows containing non-finite values (stat_smooth).
+#&gt; Warning: Removed 16 rows containing missing values (geom_point).
 #&gt; Combine all hyperparameters</code></pre>
 <p><img src="Zimmerman_vignette_files/figure-html/unnamed-chunk-9-7.png" width="700"></p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R">
 <span class="va">SimulationParameters</span>
 <span class="co">#&gt; $drop.shape</span>
-<span class="co">#&gt; [1] 4.101524</span>
+<span class="co">#&gt; [1] 4.6279</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $drop.rate</span>
-<span class="co">#&gt; [1] 12.17911</span>
+<span class="co">#&gt; [1] 14.94318</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $drop.beta0</span>
-<span class="co">#&gt; [1] 0.01257415</span>
+<span class="co">#&gt; [1] 0.01457663</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $drop.beta1</span>
-<span class="co">#&gt; [1] 0.1895456</span>
+<span class="co">#&gt; [1] 0.1767519</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $drop.beta2</span>
-<span class="co">#&gt; [1] -0.1819284</span>
+<span class="co">#&gt; [1] -0.1647721</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $grandmean.shape</span>
-<span class="co">#&gt; [1] 3.470282</span>
+<span class="co">#&gt; [1] 6.365357</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $grandmean.rate</span>
-<span class="co">#&gt; [1] 2.056208</span>
+<span class="co">#&gt; [1] 4.169684</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $grandmean_interSD.beta1</span>
-<span class="co">#&gt; [1] 0.1215916</span>
+<span class="co">#&gt; [1] 0.1314299</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $intraSD_dispersion.beta0</span>
-<span class="co">#&gt; [1] 2.762912</span>
+<span class="co">#&gt; [1] 2.566065</span>
 <span class="co">#&gt; </span>
 <span class="co">#&gt; $intraSD_dispersion.beta1</span>
-<span class="co">#&gt; [1] 0.5880615</span>
+<span class="co">#&gt; [1] 0.8077408</span>
 
 <span class="co"># SimulationParameters &lt;- GEEutils::getSimulationParameters(object = sce,</span>
 <span class="co">#                                                 clustering = "patient_id",</span>
@@ -337,11 +337,11 @@
 
 <span class="va">simulatedData_pois</span><span class="op">[</span><span class="fl">1</span><span class="op">:</span><span class="fl">5</span>,<span class="fl">1</span><span class="op">:</span><span class="fl">5</span><span class="op">]</span>
 <span class="co">#&gt;        Cell_1 Cell_2 Cell_3 Cell_4 Cell_5</span>
-<span class="co">#&gt; Gene_1      0      7      9      0      0</span>
-<span class="co">#&gt; Gene_2      1      3      0      2      2</span>
-<span class="co">#&gt; Gene_3      4      0      0      0      0</span>
-<span class="co">#&gt; Gene_4      2      3      0      0      0</span>
-<span class="co">#&gt; Gene_5      0      0      0      0      0</span>
+<span class="co">#&gt; Gene_1      0      0      0      0      3</span>
+<span class="co">#&gt; Gene_2      2      0      0      0      0</span>
+<span class="co">#&gt; Gene_3      0      0      0      0      0</span>
+<span class="co">#&gt; Gene_4      0      4      0      0      0</span>
+<span class="co">#&gt; Gene_5      0      0      3      3      0</span>
 
 <span class="co"># set.seed(55)</span>
 <span class="co"># simulatedData_NB &lt;- GEEutils::simulator(design = design,</span>
