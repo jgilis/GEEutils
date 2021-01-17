@@ -2,7 +2,7 @@
 title: "GEEutils: reproducing the pseudoreplication paper by Zimmerman et al."
 output: rmarkdown::html_vignette
 author: "Jeroen Gilis"
-date: "09/01/2020"
+date: "`r BiocStyle::doc_date()`"
 vignette: >
   %\VignetteIndexEntry{Zimmerman_vignette}
   %\VignetteEngine{knitr::rmarkdown}
