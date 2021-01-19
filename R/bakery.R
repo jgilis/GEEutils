@@ -1,4 +1,5 @@
 # Calculate the modified GEE variance estimator proposed by Kauermann and Carroll (2001).
+#' @import geesmv
 .bakery_KC <- function(gee.fit, data, mat, corstr) {
 
     # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
@@ -82,6 +83,7 @@
 
 
 # Calculate the modified GEE variance estimator proposed by Pan (2001).
+#' @import geesmv
 .bakery_Pan <- function(gee.fit, data, mat, corstr) {
 
     # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess

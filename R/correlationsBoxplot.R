@@ -1,4 +1,5 @@
 # Compute pairwise inter-individual correlation
+#' @importFrom utils combn
 .interpairwiseCor <- function(X) {
     pairs <- combn(colnames(as.data.frame(X)), 2, simplify = FALSE)
     ngenes_vector <- vector(mode = "numeric", length = length(pairs)) # not used?
@@ -24,6 +25,7 @@
 }
 
 # Compute estimates for target contrast
+#' @importFrom utils combn
 .intrapairwiseCor <- function(X) {
     pairs <- combn(rownames(as.data.frame(X)), 2, simplify = FALSE)
     pairs <- sample(pairs, 60) # comment out for all
