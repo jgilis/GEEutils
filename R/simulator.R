@@ -30,72 +30,106 @@
 #' @import stats
 #'
 #' @export
-
-simulator <- function(design, SimulationParameters, nGenes, distribution, fractionDGE = 0, foldchange = 1){
-
-  if(!"cluster" %in% colnames(design)) {stop("design must contain column with name cluster")}
-  if(!"group" %in% colnames(design)) {stop("design must contain column with name group")}
-  if(!"ncells" %in% colnames(design)) {stop("design must contain column with name ncells")}
-
-  simulatedData <- as.data.frame(matrix(data = NA, nrow = nGenes, sum(design$ncells)))
-
-  for (i in seq_len(nGenes)) {
-
-    # get grandmean and relationship with the inter-individual standard deviations
-    grandmean <- rgamma(n=1, shape=SimulationParameters$grandmean.shape, rate=SimulationParameters$grandmean.rate)
-    stddev.of.within.means <- SimulationParameters$grandmean_interSD.beta1*grandmean
-
-    # get foldchange direction
-    if(i <= nGenes*fractionDGE){ # its a DE gene
-      # Now all foldchanges will be "foldchange" or "-foldchange".
-      # It would be better to sample foldchanges from a distribution with mean "foldchange"
-      foldchange <- ifelse(stats::rbinom(n=1, size=1, prob = 0.5) == 1, foldchange, 1/foldchange)
-    } else { # its not a DE gene
-      foldchange <- 1
+simulator <- function(design,
+                      SimulationParameters,
+                      nGenes, distribution,
+                      fractionDGE = 0,
+                      foldchange = 1) {
+    if (!"cluster" %in% colnames(design)) {
+        stop("design must contain column with name cluster")
+    }
+    if (!"group" %in% colnames(design)) {
+        stop("design must contain column with name group")
+    }
+    if (!"ncells" %in% colnames(design)) {
+        stop("design must contain column with name ncells")
     }
 
-    # get zero probability
-    prob.zero <- rgamma(n=1, shape=SimulationParameters$drop.shape, rate=SimulationParameters$drop.rate) # sampled from gamma
-    prob.zero <- ifelse(prob.zero > 1,
-                        rgamma(n=1,shape=SimulationParameters$drop.shape, rate=SimulationParameters$drop.rate),
-                        prob.zero)
-    drop.sd <- SimulationParameters$drop.beta0 + SimulationParameters$drop.beta1*prob.zero + SimulationParameters$drop.beta2*(prob.zero**2)
-    drop.sd <- ifelse(drop.sd < 0, 0, drop.sd)
-    prob.zero <- rnorm(n=1,mean = prob.zero, sd = drop.sd)
-    prob.zero <- ifelse(prob.zero < 0, 0, prob.zero)
-    prob.zero <- ifelse(prob.zero > 1, 1, prob.zero)
-    prob.zero <- 1 - prob.zero
+    # TODO: might be more efficient to keep this as a matrix
+    simulatedData <- as.data.frame(
+        matrix(data = NA, nrow = nGenes, ncol = sum(design$ncells))
+    )
 
-    for (cluster_id in levels(design$cluster)){ # for each design levels of group
+    params <- SimulationParameters
+    for (i in seq_len(nGenes)) {
+        # get grandmean and relationship with inter-individual standard deviations
+        grandmean <- rgamma(
+            n = 1, shape = params$grandmean.shape, rate = params$grandmean.rate
+        )
+        stddev.of.within.means <- params$grandmean_interSD.beta1 * grandmean
 
-      reference <- design$group[1]
+        # get foldchange direction
+        if (i <= nGenes * fractionDGE) { # its a DE gene
+            # Now all foldchanges will be "foldchange" or "-foldchange".
+            # TODO: It would be better to sample foldchanges from a distribution with mean "foldchange"
+            foldchange <- ifelse(
+                rbinom(n = 1, size = 1, prob = 0.5) == 1,
+                foldchange,
+                1 / foldchange
+            )
+        } else { # its not a DE gene
+            foldchange <- 1
+        }
 
-      if(design[which(design$cluster == cluster_id),"group"] == reference){
-        temp.mean <- grandmean + rnorm(n=1,mean=0,sd=stddev.of.within.means)
-      } else {
-        temp.mean <- (grandmean*foldchange) + rnorm(n=1,mean=0,sd=stddev.of.within.means)
-      }
-      temp.mean <- ifelse(temp.mean < 0, 0.0000001, temp.mean)
-      temp.size <- exp(SimulationParameters$intraSD_dispersion.beta0 + (SimulationParameters$intraSD_dispersion.beta1/temp.mean))
-      if(distribution=="NB"){
-        temp.cells <- rnbinom(n=design[which(design$cluster == cluster_id),"ncells"],mu = temp.mean, size = temp.size) # sampled from NB
-      } else if(distribution=="poisson"){
-        temp.cells <- rpois(n=design[which(design$cluster == cluster_id),"ncells"],lambda = temp.mean) # sampled from poisson
-      }
+        # get zero probability
+        prob.zero <- rgamma(
+            n = 1, shape = params$drop.shape, rate = params$drop.rate
+        ) # sampled from gamma
+        prob.zero <- ifelse(
+            prob.zero > 1,
+            rgamma(n = 1, shape = params$drop.shape, rate = params$drop.rate),
+            prob.zero
+        )
+        drop.sd <- params$drop.beta0 + params$drop.beta1 * prob.zero + params$drop.beta2 * (prob.zero**2)
+        drop.sd <- ifelse(drop.sd < 0, 0, drop.sd)
+        prob.zero <- rnorm(n = 1, mean = prob.zero, sd = drop.sd)
+        prob.zero <- ifelse(prob.zero < 0, 0, prob.zero)
+        prob.zero <- ifelse(prob.zero > 1, 1, prob.zero)
+        prob.zero <- 1 - prob.zero
 
-      temp.cells <- ifelse(rbinom(n=length(temp.cells), size=1, prob=prob.zero) == 1, 0, temp.cells)
+        for (cluster_id in levels(design$cluster)) {
+            # for each design levels of group
+            reference <- design$group[1]
 
-      # there is a dedicated function or at least a strategy for this but I forgot
-      start <- 1 + sum(design$ncells[1:which(design$cluster == cluster_id)-1])
-      end <- sum(design$ncells[1:which(design$cluster == cluster_id)])
+            if (design[which(design$cluster == cluster_id), "group"] == reference) {
+                temp.mean <- grandmean + rnorm(n = 1, mean = 0, sd = stddev.of.within.means)
+            } else {
+                temp.mean <- (grandmean * foldchange) + rnorm(n = 1, mean = 0, sd = stddev.of.within.means)
+            }
+            temp.mean <- ifelse(temp.mean < 0, 0.0000001, temp.mean)
+            temp.size <- exp(params$intraSD_dispersion.beta0 + (params$intraSD_dispersion.beta1 / temp.mean))
+            if (distribution == "NB") {
+                # sampled from NB
+                temp.cells <- rnbinom(
+                    n = design[which(design$cluster == cluster_id), "ncells"],
+                    mu = temp.mean,
+                    size = temp.size
+                )
+            } else if (distribution == "poisson") {
+                # sampled from poisson
+                temp.cells <- rpois(
+                    n = design[which(design$cluster == cluster_id), "ncells"],
+                    lambda = temp.mean
+                )
+            }
 
-      simulatedData[i, start:end] <- temp.cells
+            temp.cells <- ifelse(
+                rbinom(n = length(temp.cells), size = 1, prob = prob.zero) == 1,
+                0,
+                temp.cells
+            )
+
+            # FIXME: there is a dedicated function or at least a strategy for this but I forgot
+            start <- 1 + sum(design$ncells[1:which(design$cluster == cluster_id) - 1])
+            end <- sum(design$ncells[1:which(design$cluster == cluster_id)])
+
+            simulatedData[i, start:end] <- temp.cells
+        }
     }
-  }
 
-  rownames(simulatedData) <- paste0("Gene_", 1:nrow(simulatedData))
-  colnames(simulatedData) <- paste0("Cell_", 1:ncol(simulatedData))
-  simulatedData <- as.matrix(simulatedData)
+    rownames(simulatedData) <- paste0("Gene_", seq_len(nrow(simulatedData)))
+    colnames(simulatedData) <- paste0("Cell_", seq_len(ncol(simulatedData)))
+    simulatedData <- as.matrix(simulatedData)
 
-  return(simulatedData)
+    simulatedData
 }
