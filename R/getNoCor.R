@@ -32,7 +32,8 @@ getNoCor <- function(object,
     if (class(object)[1] == "matrix") {
         counts <- as.data.frame(t(object)) # transpose necessary for cor function
     } else if (class(object)[1] == "SingleCellExperiment") {
-        counts <- as.data.frame(t(as.matrix(sce@assays@data[[1]]))) # transpose necessary for cor function
+        # FIXME: use of `@` heavily discouraged; use appropriate accessor instead
+        counts <- as.data.frame(t(as.matrix(object@assays@data[[1]]))) # transpose necessary for cor function
     } else {
         stop(
           "The provided object is not a matrix nor a SingleCellExperiment",
