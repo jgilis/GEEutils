@@ -1,25 +1,28 @@
-#' Simulate a synthetic scRNA-Seq dataset based on parameters obtained with getSimulationParameters
+#' Simulate a synthetic scRNA-Seq dataset based on parameters obtained with
+#' getSimulationParameters
 #'
-#' @description Simulate a synthetic scRNA-Seq dataset based on parameters obtained with getSimulationParameters
+#' @description Simulate a synthetic scRNA-Seq dataset based on parameters
+#'   obtained with getSimulationParameters
 #'
-#' @param design A `data frame` containing 3 columns.
-#'  Column `cluster` is a `factor` that specifies the clustering of the observations.
-#'  Column `group` is a `factor` that specifies to which (treatment) group the observations belong.
-#'  Column `ncells` is a `numeric`indicating the number of cells belonging to each of the clusters.
+#' @param design A `data frame` containing 3 columns. Column `cluster` is a
+#'   `factor` that specifies the clustering of the observations. Column `group`
+#'   is a `factor` that specifies to which (treatment) group the observations
+#'   belong. Column `ncells` is a `numeric`indicating the number of cells
+#'   belonging to each of the clusters.
 #'
-#' @param SimulationParameters A `list` of simulation parameters obtained with the `GEEutils::getSimulationParameters`.
-#'
-#' @param data An optional `data frame` in which to interpret the variables occurring in the formula,
-#'  along with the id and n variables.
+#' @param SimulationParameters A `list` of simulation parameters obtained with
+#'   the `GEEutils::getSimulationParameters`.
 #'
 #' @param nGenes A `numeric` indicating hoe many genes should be simulated.
 #'
-#' @param distribution A `character` indicating from which baseline distribution the data should be sampled. Either "NB" or "poisson".
+#' @param distribution A `character` indicating from which baseline distribution
+#'   the data should be sampled. Either "NB" or "poisson".
 #'
-#' @param fractionDGE A `numeric` between 0 and 1, indicating the fraction of differentially expressed genes in the simulated data.
-#' Defaults to zero.
-#' @param foldchange A `numeric` indicating the size of differential expression in terms of a fold change.
-#' Defaults to 1 (not differentially expressed, mock dataset).
+#' @param fractionDGE A `numeric` between 0 and 1, indicating the fraction of
+#'   differentially expressed genes in the simulated data. Defaults to zero.
+#' @param foldchange A `numeric` indicating the size of differential expression
+#'   in terms of a fold change. Defaults to 1 (not differentially expressed,
+#'   mock dataset).
 #'
 #' @return A `matrix` of simulated gene expression data.
 #'

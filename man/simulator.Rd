@@ -2,7 +2,8 @@
 % Please edit documentation in R/simulator.R
 \name{simulator}
 \alias{simulator}
-\title{Simulate a synthetic scRNA-Seq dataset based on parameters obtained with getSimulationParameters}
+\title{Simulate a synthetic scRNA-Seq dataset based on parameters obtained with
+getSimulationParameters}
 \usage{
 simulator(
   design,
@@ -14,31 +15,33 @@ simulator(
 )
 }
 \arguments{
-\item{design}{A `data frame` containing 3 columns.
-Column `cluster` is a `factor` that specifies the clustering of the observations.
-Column `group` is a `factor` that specifies to which (treatment) group the observations belong.
-Column `ncells` is a `numeric`indicating the number of cells belonging to each of the clusters.}
+\item{design}{A `data frame` containing 3 columns. Column `cluster` is a
+`factor` that specifies the clustering of the observations. Column `group`
+is a `factor` that specifies to which (treatment) group the observations
+belong. Column `ncells` is a `numeric`indicating the number of cells
+belonging to each of the clusters.}
 
-\item{SimulationParameters}{A `list` of simulation parameters obtained with the `GEEutils::getSimulationParameters`.}
+\item{SimulationParameters}{A `list` of simulation parameters obtained with
+the `GEEutils::getSimulationParameters`.}
 
 \item{nGenes}{A `numeric` indicating hoe many genes should be simulated.}
 
-\item{distribution}{A `character` indicating from which baseline distribution the data should be sampled. Either "NB" or "poisson".}
+\item{distribution}{A `character` indicating from which baseline distribution
+the data should be sampled. Either "NB" or "poisson".}
 
-\item{fractionDGE}{A `numeric` between 0 and 1, indicating the fraction of differentially expressed genes in the simulated data.
-Defaults to zero.}
+\item{fractionDGE}{A `numeric` between 0 and 1, indicating the fraction of
+differentially expressed genes in the simulated data. Defaults to zero.}
 
-\item{foldchange}{A `numeric` indicating the size of differential expression in terms of a fold change.
-Defaults to 1 (not differentially expressed, mock dataset).}
-
-\item{data}{An optional `data frame` in which to interpret the variables occurring in the formula,
-along with the id and n variables.}
+\item{foldchange}{A `numeric` indicating the size of differential expression
+in terms of a fold change. Defaults to 1 (not differentially expressed,
+mock dataset).}
 }
 \value{
 A `matrix` of simulated gene expression data.
 }
 \description{
-Simulate a synthetic scRNA-Seq dataset based on parameters obtained with getSimulationParameters
+Simulate a synthetic scRNA-Seq dataset based on parameters
+  obtained with getSimulationParameters
 }
 \author{
 Jeroen Gilis
