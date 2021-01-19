@@ -70,8 +70,8 @@ correlationsBoxplot <- function(object, clustering) {
     # FIXME: avoid pipes in pkg functions
     # TODO: replace with `lapply`? Would allow removing purrr as dependency
     repmeans <- 1:n_rep %>%
-        purrr::map(GEEutils:::.onecell, data = data) %>%
-        purrr::map(GEEutils:::.interpairwiseCor)
+        purrr::map(.onecell, data = data) %>%
+        purrr::map(.interpairwiseCor)
 
     # FIXME: unmatrix from which pkg?
     inter_corr <- unmatrix(do.call("rbind", repmeans))
@@ -86,7 +86,7 @@ correlationsBoxplot <- function(object, clustering) {
     inter_corr$Correlation <- as.numeric(as.character(inter_corr$Correlation))
 
     # intra-individual correlations
-    intra_corr <- as.numeric(unlist(sapply(data, GEEutils:::.intrapairwiseCor)))
+    intra_corr <- as.numeric(unlist(sapply(data, .intrapairwiseCor)))
     intra_corr <- cbind(
         rep("Intra_Alpha_Correlation",
         length(intra_corr)),
