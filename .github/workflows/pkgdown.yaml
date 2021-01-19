@@ -6,6 +6,12 @@ on:
 
 name: pkgdown
 
+## Environment variable to control deployment of pkgdown site
+## If "deploy: 'true'", will deploy pkgdown site to 'gh-pages' branch;
+## if not, will upload pkgdown output as artifact.
+env:
+  deploy: 'false'
+
 jobs:
   pkgdown:
     runs-on: macOS-latest
@@ -42,7 +48,25 @@ jobs:
         run: R CMD INSTALL .
 
       - name: Deploy package
+        ## Deploy pkgdown site only if on master branch and if deploy == true
+        if: github.ref == 'refs/heads/master' && env.deploy == 'true'
         run: |
           git config --local user.email "actions@github.com"
           git config --local user.name "GitHub Actions"
           Rscript -e 'pkgdown::deploy_to_branch(new_process = FALSE)'
+
+      ## Alternative workflow if deploy == false
+      ## Builds pkgdown website and then uploads output as artifact
+      - name: Build pkgdown site
+        if: github.ref == 'refs/heads/master' && env.deploy == 'false'
+        run: |
+          pkgdown::build_site(devel = TRUE)
+        shell: Rscript {0}
+
+      - name: Upload pkgdown output
+        if: github.ref == 'refs/heads/master' && env.deploy == 'false'
+        uses: actions/upload-artifact@main
+        with:
+          name: pkgdown-output
+          path: |
+            docs/
