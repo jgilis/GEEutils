@@ -18,6 +18,8 @@
 
 # Apply .pullonecell on an expression matrix
 .onecell <- function(x, data) {
+    # FIXME: replace `sapply` with `vapply`
+    # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
     sapply(data, .pullonecell)
 }
 
@@ -59,16 +61,20 @@ correlationsBoxplot <- function(object, clustering) {
     message("Function still under construction")
 
     # wrangle data
+    # FIXME: use of `@` heavily discouraged; use appropriate accessor instead
     data <- as.data.frame(t(as.matrix(object@assays@data@listData$counts)))
     data <- split(data, object[[clustering]])
 
     # inter-individual correlations
     n_rep <- 10
+    # FIXME: avoid pipes in pkg functions
+    # TODO: replace with `lapply`? Would allow removing purrr as dependency
     repmeans <- 1:n_rep %>%
         purrr::map(GEEutils:::.onecell, data = data) %>%
         purrr::map(GEEutils:::.interpairwiseCor)
 
-    inter_corr <- unmatrix(do.call("rbind", repmeans)) # unmatrix from which pkg?
+    # FIXME: unmatrix from which pkg?
+    inter_corr <- unmatrix(do.call("rbind", repmeans))
     inter_corr <- cbind(
         rep("Inter_Alpha_Correlation", length(inter_corr)),
         inter_corr

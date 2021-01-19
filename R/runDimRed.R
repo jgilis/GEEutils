@@ -47,6 +47,8 @@ runDimRed <- function(object, clustering, type = "TSNE", downsample = 500) {
     if (downsample) {
         # downsample to max. "downsample" cells per cluster
         cs_by_k <- split(colnames(object), clustering)
+        # FIXME: replace `sapply` with `vapply`
+        # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
         csDown <- unlist(sapply(cs_by_k, function(u) {
               sample(u, min(length(u), downsample))
           }))
