@@ -76,8 +76,7 @@
     if (plot) {
         gg <- ggplot(sumStats, aes(DropOut)) +
           geom_histogram(
-            # TODO: replace ..density.. with after_stat(density)
-            aes(y = ..density..),
+            aes(y = after_stat(density)),
             fill = "cornflowerblue", color = "black"
           ) +
           ylab("Density") +
@@ -124,9 +123,8 @@
 
     if (plot) {
         gg <- ggplot(sumStats, aes(GrandMean)) +
-          # TODO: replace ..density.. with after_stat(density)
           geom_histogram(
-              aes(y = ..density..),
+              aes(y = after_stat(density)),
               fill = "cornflowerblue", color = "black"
           ) +
           ylab("Density") +
@@ -139,9 +137,8 @@
         print(gg)
 
         gg <- ggplot(sumStats, aes(GrandMean)) +
-            # TODO: replace ..density.. with after_stat(density)
             geom_histogram(
-                aes(y = ..density..),
+                aes(y = after_stat(density)),
                 fill = "cornflowerblue", color = "black"
             ) +
             stat_function(
