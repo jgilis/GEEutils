@@ -2,25 +2,30 @@
 % Please edit documentation in R/getSimulationParameters.R
 \name{getSimulationParameters}
 \alias{getSimulationParameters}
-\title{Obtain parameters for simulating synthetic asRNA-Seq data based on a real scRNA-Seq dataset.}
+\title{Obtain parameters for simulating synthetic asRNA-Seq data based on a real
+scRNA-Seq dataset.}
 \usage{
 getSimulationParameters(object, clustering, plot = TRUE, verbose = FALSE)
 }
 \arguments{
 \item{object}{A `SingleCellExperiment` instance.}
 
-\item{clustering}{A `character vector` indicating the categorical variable that is used to color the dimensionality reduction plot.
-Must be one of `colnames(colData(object))`.}
+\item{clustering}{A `character vector` indicating the categorical variable
+that is used to color the dimensionality reduction plot. Must be one of
+`colnames(colData(object))`.}
 
-\item{plot}{`Logical` TRUE or FALSE; should intermediate visualizations be generated?}
+\item{plot}{`Logical` TRUE or FALSE; should intermediate visualizations be
+generated?}
 
 \item{verbose}{`Logical` TRUE or FALSE; should progress be printed?}
 }
 \value{
-A `list` 10 parameters that can be used to simulate synthetic scRNA-Seq datasets
+A `list` of 10 parameters that can be used to simulate synthetic
+  scRNA-Seq datasets
 }
 \description{
-Extract parameters from a scRNA-Seq dataset that are relevant for simulating synthetic asRNA-Seq data.
+Extract parameters from a scRNA-Seq dataset that are relevant
+  for simulating synthetic asRNA-Seq data.
 }
 \author{
 Jeroen Gilis

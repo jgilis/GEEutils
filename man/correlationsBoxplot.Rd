@@ -9,13 +9,15 @@ correlationsBoxplot(object, clustering)
 \arguments{
 \item{object}{A `SingleCellExperiment` object.}
 
-\item{clustering}{A `character` string indicating from which individual each cells originates}
+\item{clustering}{A `character` string indicating from which individual each
+cells originates}
 }
 \value{
 A `ggplot` object.
 }
 \description{
-Visualize inter- and intra-individual correlations by means of boxplots
+Visualize inter- and intra-individual correlations by means of
+  boxplots
 }
 \author{
 Jeroen Gilis

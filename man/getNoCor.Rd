@@ -7,16 +7,21 @@
 getNoCor(object, nFeatures = 500, method = "spearman", cutoff = 0.25)
 }
 \arguments{
-\item{object}{Either a `matrix` or a `SingleCellExperiment` instance. If it is a `SingleCellExperiment` instance, the first assay will be taken
-as the reference assay from which uncorrelated features are selected.}
+\item{object}{Either a `matrix` or a `SingleCellExperiment` instance. If it
+is a `SingleCellExperiment` instance, the first assay will be taken as the
+reference assay from which uncorrelated features are selected.}
 
-\item{nFeatures}{The number of correlated features to be returned. Note that if this number is larger than the number of uncorrelated features
-in the data, a `matrix` or `SingleCellExperiment` with as many uncorrelated features as possible will be returned. Default is 500 features.}
+\item{nFeatures}{The number of correlated features to be returned. Note that
+if this number is larger than the number of uncorrelated features in the
+data, a `matrix` or `SingleCellExperiment` with as many uncorrelated
+features as possible will be returned. Default is 500 features.}
 
-\item{method}{A `charachter vector` indicating which correlation method should be used. One of "spearman", "pearson" or "kendall".
-Default is "spearman".}
+\item{method}{A `charachter vector` indicating which correlation method
+should be used. One of "spearman", "pearson" or "kendall". Default is
+"spearman".}
 
-\item{cutoff}{A `numeric value` between 0 and 1, indicating the maximum allowed correlation between the returned features. Defaults to 0.25.}
+\item{cutoff}{A `numeric value` between 0 and 1, indicating the maximum
+allowed correlation between the returned features. Defaults to 0.25.}
 }
 \value{
 A new `matrix` or `SingleCellExperiment` instance

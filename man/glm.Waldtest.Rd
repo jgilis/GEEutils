@@ -2,27 +2,33 @@
 % Please edit documentation in R/glm.Waldtest.R
 \name{glm.Waldtest}
 \alias{glm.Waldtest}
-\title{Perform a Wald test on a glm with the possible of adopting robust standard errors}
+\title{Perform a Wald test on a glm with the possible of adopting robust standard
+errors}
 \usage{
 glm.Waldtest(models, contrast, sandwich = TRUE, adjust = FALSE)
 }
 \arguments{
-\item{models}{A list of generalized linear model. If a single model, make sure to input it as a list by `list(glm)`.}
+\item{models}{A list of generalized linear model. If a single model, make
+sure to input it as a list by `list(glm)`.}
 
-\item{contrast}{A `matrix` specifying the contrast, i.e. combinations of model parameters, of interest.}
+\item{contrast}{A `matrix` specifying the contrast, i.e. combinations of
+model parameters, of interest.}
 
-\item{sandwich}{A `logical` variable; should robust standard errors be computed (sandwich procedure by Liang and Zeger).
-Default is TRUE.}
+\item{sandwich}{A `logical` variable; should robust standard errors be
+computed (sandwich procedure by Liang and Zeger). Default is TRUE.}
 
-\item{adjust}{A `logical` variable; should a finite sample adjustment be made?
-This amounts to multiplication with n/(n-k) where n is the number of observations and k the number of estimated parameters.}
+\item{adjust}{A `logical` variable; should a finite sample adjustment be
+made? This amounts to multiplication with n/(n-k) where n is the number of
+observations and k the number of estimated parameters.}
 }
 \value{
-A `Dataframe` containing the requested model parameter estimates, (robust) standard errors, degrees of freedom,
- Wald test statistics and p-values.
+A `Dataframe` containing the requested model parameter estimates,
+  (robust) standard errors, degrees of freedom, Wald test statistics and
+  p-values.
 }
 \description{
-Perform a Wald test on a glm with the possible of adopting robust standard errors
+Perform a Wald test on a glm with the possible of adopting
+  robust standard errors
 }
 \author{
 Jeroen Gilis
