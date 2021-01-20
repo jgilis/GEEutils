@@ -30,6 +30,39 @@
 #'
 #' @author Jeroen Gilis
 #'
+#' @examples
+#' ## Original data to simulate from
+#' sce <- scuttle::mockSCE(ncells = 100, ngenes = 1000)
+#'
+#' ## Add 4 random individuals
+#' sce$patient_id <- factor(rep(paste0("patient", 1:4), each = ncol(sce) / 4))
+#'
+#' sim_params <- getSimulationParameters(
+#'     sce, clustering = "patient_id",
+#'     plot = FALSE, verbose = FALSE
+#' )
+#'
+#' ## Set up design for simulator; 6 individuals across 2 groups
+#' cluster <- factor(paste0("individual", 1:6))
+#' group <- rep(c("group1", "group2"), each = length(cluster) / 2)
+#'
+#' ## Set total number of desired cells for each individual
+#' ncells <- rep(50, length(cluster))
+#'
+#' design <- data.frame(cluster, group, ncells)
+#'
+#' ## Simulate using Poisson model
+#' sim_pois <- simulator(
+#'     design = design,
+#'     SimulationParameters = sim_params,
+#'     nGenes = 1000,
+#'     distribution = "poisson",
+#'     fractionDGE = 0.1, #' fraction DE genes between groups
+#'     foldchange = 1.5
+#' )
+#'
+#'
+#'
 #' @import stats
 #'
 #' @export

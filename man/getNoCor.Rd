@@ -29,6 +29,14 @@ A new `matrix` or `SingleCellExperiment` instance
 \description{
 Retain only uncorrelated features from a count matrix
 }
+\examples{
+sce <- scuttle::mockSCE(ncells = 100, ngenes = 1000)
+sce_nocor <- getNoCor(
+  sce, nFeatures = 500,
+  method = "spearman", cutoff = 0.25
+)
+
+}
 \author{
 Jeroen Gilis
 }

@@ -254,6 +254,8 @@
     relationship2Params
 }
 
+# FIXME: documentation of `clustering` copied from runDimRed?
+# TODO: rename 'clustering' argument to something more intuitive?
 #' Obtain parameters for simulating synthetic asRNA-Seq data based on a real
 #' scRNA-Seq dataset.
 #'
@@ -277,6 +279,17 @@
 #' @rdname getSimulationParameters
 #'
 #' @author Jeroen Gilis
+#'
+#' @examples
+#' sce <- scuttle::mockSCE(ncells = 100, ngenes = 1000)
+#'
+#' ## Simulate 4 random individuals
+#' sce$patient_id <- factor(rep(paste0("patient", 1:4), each = ncol(sce) / 4))
+#'
+#' sim_params <- getSimulationParameters(
+#'     sce, clustering = "patient_id",
+#'     plot = FALSE, verbose = FALSE
+#' )
 #'
 #' @import ggplot2
 #' @importFrom fitdistrplus fitdist

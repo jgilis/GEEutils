@@ -24,6 +24,13 @@
 #'
 #' @author Jeroen Gilis
 #'
+#' @examples
+#' sce <- scuttle::mockSCE(ncells = 100, ngenes = 1000)
+#' sce_nocor <- getNoCor(
+#'   sce, nFeatures = 500,
+#'   method = "spearman", cutoff = 0.25
+#' )
+#'
 #' @export
 #' @importFrom methods is
 getNoCor <- function(object,

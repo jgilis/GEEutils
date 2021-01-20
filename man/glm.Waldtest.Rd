@@ -30,6 +30,32 @@ A `Dataframe` containing the requested model parameter estimates,
 Perform a Wald test on a glm with the possible of adopting
   robust standard errors
 }
+\examples{
+## Simulate single gene across 10 patients in 2 groups
+n_cells <- 500
+gene <- rpois(n_cells, 3)
+group_id <- factor(rep(c("control", "treat"), each = n_cells / 2))
+patient_id <- factor(rep(paste0("patient", 1:10), each = n_cells / 10))
+data <- data.frame(gene, group_id, patient_id)
+
+## Set up design and contrast
+design <- model.matrix(~group_id, data = data)
+L <- matrix(0, ncol = 1, nrow = ncol(design))
+rownames(L) <- colnames(design)
+L["group_idtreat", 1] <- 1
+
+## Fit Poisson model
+pois_model <- glm(gene ~ group_id, family = poisson, data = data)
+
+## Wald test with sandwich estimator and small sample-size adjustment
+res <- glm.Waldtest(
+    models = list(pois_model),
+    contrast = L[, 1],
+    sandwich = TRUE,
+    adjust = TRUE
+)
+
+}
 \author{
 Jeroen Gilis
 }

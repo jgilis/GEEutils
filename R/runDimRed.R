@@ -7,7 +7,7 @@
   }
 
 # TODO: do we really need this as a package function?
-# Seems a bit out of line with rest of pkg; unless we would add more plotting functionality
+# Seems a bit out of line with rest of pkg
 
 #' Wrapper function to produce a pretty dimensionality reduction plot
 #'
@@ -40,9 +40,21 @@
 #' @importFrom scater plotReducedDim
 #' @import ggplot2
 #'
+#' @examples
+#' library(scuttle)
+#' sce <- mockSCE(ncells = 100, ngenes = 1000)
+#' sce <- logNormCounts(sce)
+#' sce <- scater::runTSNE(sce)
+#'
+#' ## Simulate 4 random individuals
+#' sce$patient_id <- factor(rep(paste0("patient", 1:4), each = ncol(sce) / 4))
+#'
+#' runDimRed(sce, clustering = "patient_id", type = "TSNE", downsample = FALSE)
+#'
 #' @export
 # TODO: why not return as ggplot object? Would allow further manipulation and
 #       exporting of plot
+# FIXME: function doesn't work if Dim. Red not yet calculated, so name is misleading
 runDimRed <- function(object, clustering, type = "TSNE", downsample = 500) {
     if (downsample) {
         # downsample to max. "downsample" cells per cluster

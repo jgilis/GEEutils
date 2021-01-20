@@ -27,6 +27,18 @@ A `list` of 10 parameters that can be used to simulate synthetic
 Extract parameters from a scRNA-Seq dataset that are relevant
   for simulating synthetic asRNA-Seq data.
 }
+\examples{
+sce <- scuttle::mockSCE(ncells = 100, ngenes = 1000)
+
+## Simulate 4 random individuals
+sce$patient_id <- factor(rep(paste0("patient", 1:4), each = ncol(sce) / 4))
+
+sim_params <- getSimulationParameters(
+    sce, clustering = "patient_id",
+    plot = FALSE, verbose = FALSE
+)
+
+}
 \author{
 Jeroen Gilis
 }

@@ -30,6 +30,18 @@ Prints the dimensionality reduced plot directly to console.
 Wrapper function to produce a pretty dimensionality reduction
   plot
 }
+\examples{
+library(scuttle)
+sce <- mockSCE(ncells = 100, ngenes = 1000)
+sce <- logNormCounts(sce)
+sce <- scater::runTSNE(sce)
+
+## Simulate 4 random individuals
+sce$patient_id <- factor(rep(paste0("patient", 1:4), each = ncol(sce) / 4))
+
+runDimRed(sce, clustering = "patient_id", type = "TSNE", downsample = FALSE)
+
+}
 \author{
 Jeroen Gilis
 }

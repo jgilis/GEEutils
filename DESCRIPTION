@@ -31,7 +31,8 @@ Suggests:
     SingleCellExperiment,
     Matrix,
     geepack,
-    geeM
+    geeM,
+    scuttle
 VignetteBuilder: knitr
 Collate: 'getNoCor.R' 'runDimRed.R' 'getSimulationParameters.R' 'simulator.R' 'bakery.R'
         'glm.Waldtest.R' 'correlationsBoxplot.R'

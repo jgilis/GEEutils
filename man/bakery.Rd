@@ -52,6 +52,35 @@ An object of class "gee" including multiple sandwich estimators.
 Compute robust standard error estimates using multiple sandwich
   strategies
 }
+\examples{
+## Simulate single gene across 10 patients in 2 groups
+n_cells <- 500
+gene <- rpois(n_cells, 3)
+group_id <- factor(rep(c("control", "treat"), each = n_cells / 2))
+patient_id <- factor(rep(paste0("patient", 1:10), each = n_cells / 10))
+data <- data.frame(gene, group_id, patient_id)
+
+## Run bakery with KC and Pan extra sandwiches
+out <- bakery(
+    formula = gene ~ group_id,
+    id = "patient_id",
+    data = data,
+    family = "poisson",
+    corstr = "exchangeable",
+    silent = TRUE,
+    extraSandwich = c("KC", "Pan")
+)
+
+## Liang-Zeger variance estimates
+diag(out$robust.variance)
+
+## KC variance estimates
+diag(out$KC.variance)
+
+## Pan variance estimates
+diag(out$Pan.variance)
+
+}
 \author{
 Jeroen Gilis
 }
