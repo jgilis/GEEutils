@@ -16,7 +16,6 @@ Imports:
     stats,
     gee,
     matrixcalc,
-    purrr,
     gdata,
     geepack,
     geeM,

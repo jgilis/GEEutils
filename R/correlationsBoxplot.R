@@ -56,7 +56,6 @@
 #' @author Jeroen Gilis
 #'
 #' @import ggplot2
-#' @importFrom purrr map
 #'
 #' @export
 correlationsBoxplot <- function(object, clustering) {
@@ -69,13 +68,11 @@ correlationsBoxplot <- function(object, clustering) {
 
     # inter-individual correlations
     n_rep <- 10
-    # FIXME: avoid pipes in pkg functions
-    # TODO: replace with `lapply`? Would allow removing purrr as dependency
-    repmeans <- 1:n_rep %>%
-        purrr::map(.onecell, data = data) %>%
-        purrr::map(.interpairwiseCor)
+    # TODO: I think this can be further optimizd by combining the 2 loops
+    repmeans <- lapply(seq_len(n_rep), .onecell, data = data)
+    repmeans_inter_corr <- lapply(repmeans, .interpairwiseCor)
 
-    inter_corr <- gdata::unmatrix(do.call("rbind", repmeans))
+    inter_corr <- gdata::unmatrix(do.call("rbind", repmeans_inter_corr))
     inter_corr <- cbind(
         rep("Inter_Alpha_Correlation", length(inter_corr)),
         inter_corr
