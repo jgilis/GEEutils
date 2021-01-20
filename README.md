@@ -1,0 +1,56 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+# GEEutils
+
+<!-- badges: start -->
+
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![R-CMD-check-bioc](https://github.com/jgilis/GEEutils/workflows/R-CMD-check-bioc/badge.svg)](https://github.com/jgilis/GEEutils/actions)
+<!-- badges: end -->
+
+The goal of `GEEutils` is to …
+
+## Installation instructions
+
+<!-- Get the latest stable `R` release from [CRAN](http://cran.r-project.org/). Then install `GEEutils` using from [Bioconductor](http://bioconductor.org/) the following code: -->
+
+<!-- ```{r 'install', eval = FALSE} -->
+
+<!-- if (!requireNamespace("BiocManager", quietly = TRUE)) { -->
+
+<!--     install.packages("BiocManager") -->
+
+<!-- } -->
+
+<!-- BiocManager::install("GEEutils") -->
+
+<!-- ``` -->
+
+Get the development version from [GitHub](https://github.com/) with:
+
+``` r
+BiocManager::install("jgilis/GEEutils")
+```
+
+## Example
+
+``` r
+library(GEEutils)
+## basic example code
+```
+
+<!-- ## Citation -->
+
+<!-- Below is the citation output from using `citation('GEEutils')` in R. Please -->
+
+<!-- run this yourself to check for any updates on how to cite __GEEutils__. -->
+
+<!-- ```{r 'citation', eval = requireNamespace('GEEutils')} -->
+
+<!-- print(citation('GEEutils'), bibtex = TRUE) -->
+
+<!-- ``` -->
+
+<!-- Please note that the `GEEutils` was only made possible thanks to many other R and bioinformatics software authors, which are cited either in the vignettes and/or the paper(s) describing this package. -->
