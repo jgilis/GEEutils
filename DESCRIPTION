@@ -17,7 +17,8 @@ Imports:
     gdata,
     geesmv,
     sandwich,
-    utils
+    utils,
+    methods
 Suggests:
     knitr,
     rmarkdown,

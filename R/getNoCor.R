@@ -25,6 +25,7 @@
 #' @author Jeroen Gilis
 #'
 #' @export
+#' @importFrom methods is
 getNoCor <- function(object,
                      nFeatures = 500,
                      method = "spearman",
