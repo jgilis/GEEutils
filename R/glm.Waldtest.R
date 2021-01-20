@@ -25,13 +25,11 @@
 }
 
 # Compute the robust standard error on a target model estimate
+#' @importFrom sandwich sandwich
 .sandwichVarContrast <- function(model, contrast, adjust) {
     if (!any(class(model) == "fitError")) {
-        if (adjust) {
-            sanwich_var <- sandwich(model, adjust = TRUE) # small sample adjustment, divide by n-k
-        } else {
-            sanwich_var <- sandwich(model, adjust = FALSE)
-        }
+        # if adjust == TRUE: small sample adjustment, divide by n-k
+        sanwich_var <- sandwich(model, adjust = adjust) 
         if (nrow(sanwich_var) == length(contrast)) {
             return(sqrt(diag(t(contrast) %*% sanwich_var %*% contrast)))
         }
