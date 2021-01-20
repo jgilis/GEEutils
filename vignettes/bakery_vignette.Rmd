@@ -26,8 +26,8 @@ These estimators, along with several others, have already been implemented in R 
 
 # Install GEEutils
 
-```
-devtools::install_local("/Users/jg/Desktop/PhD/GEE/GEEutils", force = T, quiet = F)
+```{r, eval=FALSE}
+devtools::install_local(".", force = TRUE, quiet = FALSE)
 ```
 
 # Load libraries
@@ -39,6 +39,8 @@ library(geeM)
 library(geesmv)
 library(gee)
 library(sandwich)
+
+library(GEEutils)
 ```
 
 # Create data

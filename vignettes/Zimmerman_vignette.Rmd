@@ -28,20 +28,20 @@ More specifically, I have included three functions in GEEutils:
 
 Note that this code is almost identical to the one presented by Zimmerman et al. However, these authors assessed their methods only different types of scRNA-Seq data, i.e., Fluidigm's C1 protocol and the smartseq2 protocol. I will here work with the 10X Kang dataset. This has strong repercussions on the validity of the proposed methods. Therefore, adaptations must certainly be made in the future.
 
-```
-devtools::install_local("/Users/jg/Desktop/PhD/GEE/GEEutils", force=TRUE, quiet = FALSE)
+```{r, eval=FALSE}
+devtools::install_local(".", force = TRUE, quiet = FALSE)
 ```
 
 # Load libraries
 
 ```{r, message=FALSE, warning=FALSE}
-suppressPackageStartupMessages({
-    library(ExperimentHub)
-    library(magrittr)
-    library(dplyr)
-    library(scater)
-    library(gdata)
-})
+library(ExperimentHub)
+library(magrittr)
+library(dplyr)
+library(scater)
+library(gdata)
+
+library(GEEutils)
 ```
 
 # Loading the Kang data from ExperimentHub
