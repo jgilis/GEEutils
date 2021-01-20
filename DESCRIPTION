@@ -8,17 +8,13 @@ Authors@R: person("Jeroen", "Gilis", role = c("aut","cre"),
 Description: Aggregation of utility functions for working with Generalized Estimation Equations.
 Depends: R (>= 4.0)
 Imports: 
-    SummarizedExperiment,
     scater,
     ggplot2,
-    Matrix,
     fitdistrplus,
     stats,
     gee,
     matrixcalc,
     gdata,
-    geepack,
-    geeM,
     geesmv,
     sandwich,
     utils
@@ -30,7 +26,11 @@ Suggests:
     BiocStyle,
     ExperimentHub,
     magrittr,
-    dplyr
+    dplyr,
+    SingleCellExperiment,
+    Matrix,
+    geepack,
+    geeM
 VignetteBuilder: knitr
 Collate: 'getNoCor.R' 'runDimRed.R' 'getSimulationParameters.R' 'simulator.R' 'bakery.R'
         'glm.Waldtest.R' 'correlationsBoxplot.R'
