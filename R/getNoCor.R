@@ -29,9 +29,9 @@ getNoCor <- function(object,
                      nFeatures = 500,
                      method = "spearman",
                      cutoff = 0.25) {
-    if (class(object)[1] == "matrix") {
+    if (is(object, "matrix")) {
         counts <- as.data.frame(t(object)) # transpose necessary for cor function
-    } else if (class(object)[1] == "SingleCellExperiment") {
+    } else if (is(object, "SingleCellExperiment")) { # TODO: replace with 'SummarizedExepriment'?
         # FIXME: use of `@` heavily discouraged; use appropriate accessor instead
         counts <- as.data.frame(t(as.matrix(object@assays@data[[1]]))) # transpose necessary for cor function
     } else {

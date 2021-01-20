@@ -15,7 +15,7 @@
 
 # Compute the standard error on a target model estimate
 .varContrast <- function(model, contrast) {
-    if (!any(class(model) == "fitError")) {
+    if (!any(is(model, "fitError"))) {
         sx <- summary(model) # maybe I can also only compute vcov to gain speed
         if (nrow(sx$cov.scaled) == length(contrast)) {
             return(sqrt(diag(t(contrast) %*% sx$cov.scaled %*% contrast))) # scaled by dispersion
@@ -27,7 +27,7 @@
 # Compute the robust standard error on a target model estimate
 #' @importFrom sandwich sandwich
 .sandwichVarContrast <- function(model, contrast, adjust) {
-    if (!any(class(model) == "fitError")) {
+    if (!any(is(model, "fitError"))) {
         # if adjust == TRUE: small sample adjustment, divide by n-k
         sanwich_var <- sandwich(model, adjust = adjust) 
         if (nrow(sanwich_var) == length(contrast)) {
