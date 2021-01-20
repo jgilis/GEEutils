@@ -75,8 +75,7 @@ correlationsBoxplot <- function(object, clustering) {
         purrr::map(.onecell, data = data) %>%
         purrr::map(.interpairwiseCor)
 
-    # FIXME: unmatrix from which pkg?
-    inter_corr <- unmatrix(do.call("rbind", repmeans))
+    inter_corr <- gdata::unmatrix(do.call("rbind", repmeans))
     inter_corr <- cbind(
         rep("Inter_Alpha_Correlation", length(inter_corr)),
         inter_corr
