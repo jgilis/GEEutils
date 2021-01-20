@@ -115,7 +115,7 @@ m3 <- geem(
     id = patient_id,
     family = poisson,
     corstr = "exch",
-    useP = T
+    useP = TRUE
 )
 
 m3$beta # estimates
