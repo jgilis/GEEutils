@@ -20,7 +20,8 @@ Imports:
     geepack,
     geeM,
     geesmv,
-    sandwich
+    sandwich,
+    utils
 Suggests:
     knitr,
     rmarkdown,
