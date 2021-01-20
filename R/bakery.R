@@ -3,7 +3,7 @@
 .bakery_KC <- function(gee.fit, data, mat, corstr) {
 
     # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
-    beta_est <- gee.fit$coefficient
+    beta_est <- gee.fit$coefficients
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
     len_vec <- len^2
@@ -13,11 +13,11 @@
     size <- cluster$m
     mat$subj <- rep(unique(data$id), cluster$n)
     if (is.character(corstr)) {
-        var <- switch(corstr, independence = cormax.ind(ncluster),
-            exchangeable = cormax.exch(ncluster, alpha), `AR-M` = cormax.ar1(
-                ncluster,
-                alpha
-            ), unstructured = summary(gee.fit)$working.correlation,
+        var <- switch(corstr,
+            independence = cormax.ind(ncluster),
+            exchangeable = cormax.exch(ncluster, alpha),
+            `AR-M` = cormax.ar1(ncluster, alpha),
+            unstructured = summary(gee.fit)$working.correlation,
         )
     } else {
         print(corstr)
@@ -87,7 +87,7 @@
 .bakery_Pan <- function(gee.fit, data, mat, corstr) {
 
     # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
-    beta_est <- gee.fit$coefficient
+    beta_est <- gee.fit$coefficients
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
     len_vec <- len^2
@@ -97,11 +97,11 @@
     size <- cluster$m
     mat$subj <- rep(unique(data$id), cluster$n)
     if (is.character(corstr)) {
-        var <- switch(corstr, independence = cormax.ind(ncluster),
-            exchangeable = cormax.exch(ncluster, alpha), `AR-M` = cormax.ar1(
-                ncluster,
-                alpha
-            ), unstructured = summary(gee.fit)$working.correlation,
+        var <- switch(corstr,
+            independence = cormax.ind(ncluster),
+            exchangeable = cormax.exch(ncluster, alpha),
+            `AR-M` = cormax.ar1(ncluster, alpha),
+            unstructured = summary(gee.fit)$working.correlation,
         )
     } else {
         print(corstr)
@@ -109,6 +109,7 @@
     }
     #####
 
+    # NOTE: `unstr` is not used (redefined later)
     cov.beta <- unstr <- matrix(0, nrow = len, ncol = len)
     step <- matrix(0, nrow = cluster$n[1], ncol = cluster$n[1])
     for (i in 1:size) {
