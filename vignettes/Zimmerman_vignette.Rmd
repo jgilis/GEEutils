@@ -11,8 +11,8 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
 
@@ -28,20 +28,20 @@ More specifically, I have included three functions in GEEutils:
 
 Note that this code is almost identical to the one presented by Zimmerman et al. However, these authors assessed their methods only different types of scRNA-Seq data, i.e., Fluidigm's C1 protocol and the smartseq2 protocol. I will here work with the 10X Kang dataset. This has strong repercussions on the validity of the proposed methods. Therefore, adaptations must certainly be made in the future.
 
-```
-devtools::install_local("/Users/jg/Desktop/PhD/GEE/GEEutils", force=TRUE, quiet = FALSE)
+```{r, eval=FALSE}
+devtools::install_local(".", force = TRUE, quiet = FALSE)
 ```
 
 # Load libraries
 
 ```{r, message=FALSE, warning=FALSE}
-suppressPackageStartupMessages({
-    library(ExperimentHub)
-    library(magrittr)
-    library(dplyr)
-    library(scater)
-    library(gdata)
-})
+library(ExperimentHub)
+library(magrittr)
+library(dplyr)
+library(scater)
+library(gdata)
+
+library(GEEutils)
 ```
 
 # Loading the Kang data from ExperimentHub
@@ -59,15 +59,16 @@ sce <- sce[, sce$multiplets == "singlet" & !is.na(sce$cell)]
 
 # Arrange colData
 colData(sce) %>%
-   as.data.frame %>%
-   transmute(
-       group_id = stim,
-       patient_id = ind,
-       sample_id = paste0(stim, ind),
-       cluster_id = cell) %>%
-   mutate_all(as.factor) %>%
-   set_rownames(colnames(sce)) %>%
-   DataFrame -> colData(sce)
+    as.data.frame() %>%
+    transmute(
+        group_id = stim,
+        patient_id = ind,
+        sample_id = paste0(stim, ind),
+        cluster_id = cell
+    ) %>%
+    mutate_all(as.factor) %>%
+    set_rownames(colnames(sce)) %>%
+    DataFrame() -> colData(sce)
 
 # remove undetected genes
 sce[rowSums(counts(sce) > 0) > 0, ]
@@ -77,8 +78,9 @@ sce <- addPerCellQC(sce)
 
 # get cells w/ few/many detected genes
 sce$is_outlier <- isOutlier(
-   metric = sce$detected,
-   nmads = 2, type = "both", log = TRUE)
+    metric = sce$detected,
+    nmads = 2, type = "both", log = TRUE
+)
 
 # remove outlier cells
 sce <- sce[, !sce$is_outlier]
@@ -93,44 +95,52 @@ sce <- logNormCounts(sce)
 Take data from a single celltype in a single treatment arm (but for multiple individuals) and only 1 cell type. Filter features again.
 
 ```{r}
-sce <- sce[,sce$group_id == "ctrl"]
-sce <- sce[,sce$cluster_id=="CD14+ Monocytes"]
+sce <- sce[, sce$group_id == "ctrl"]
+sce <- sce[, sce$cluster_id == "CD14+ Monocytes"]
 (sce <- sce[rowSums(counts(sce) > 1) >= 50, ])
 ```
 
 # Pull uncorrelated genes
 
 ```{r}
-sceNoCor <- GEEutils::getNoCor(object = sce,
-                               nFeatures = 500,
-                               method = "spearman",
-                               cutoff = 0.25)
+sceNoCor <- GEEutils::getNoCor(
+    object = sce,
+    nFeatures = 500,
+    method = "spearman",
+    cutoff = 0.25
+)
 ```
 
 # Run a tSNE plot
 
 ```{r}
-GEEutils::runDimRed(object=sceNoCor,
-                    clustering = "patient_id",
-                    type = "TSNE",
-                    downsample = FALSE)
+GEEutils::runDimRed(
+    object = sceNoCor,
+    clustering = "patient_id",
+    type = "TSNE",
+    downsample = FALSE
+)
 ```
 
 # Assess intra- and inter-individual correlation with boxplots
 
 ```{r}
-gg <- GEEutils::correlationsBoxplot(object = sceNoCor,
-                                    clustering = "patient_id")
+gg <- GEEutils::correlationsBoxplot(
+    object = sceNoCor,
+    clustering = "patient_id"
+)
 gg
 ```
 
 # Get the simulation hyperparameters
 
 ```{r}
-SimulationParameters <- GEEutils::getSimulationParameters(object = sceNoCor,
-                                                clustering = "patient_id",
-                                                plot = TRUE,
-                                                verbose = TRUE)
+SimulationParameters <- GEEutils::getSimulationParameters(
+    object = sceNoCor,
+    clustering = "patient_id",
+    plot = TRUE,
+    verbose = TRUE
+)
 
 SimulationParameters
 
@@ -144,13 +154,13 @@ SimulationParameters
 # Prepare to simulate new data
 
 ```{r}
-ncells.group1 <- c(136, 176, 644, 315 ) # exact same cell numbers per individual
+ncells.group1 <- c(136, 176, 644, 315) # exact same cell numbers per individual
 ncells.group2 <- c(86, 314, 292, 251) # exact same cell numbers per individual
 # ncells.group1 <- rep(200, 5) # 5 patients with 200 cells in group 1
 # ncells.group2 <- rep(200, 5) # 5 patients with 200 cells in group 2
 ncells <- c(ncells.group1, ncells.group2)
-cluster  <- paste0("patient_",1:8) # 10 patients in total
-group <- rep(c("group1", "group2"), each=4)
+cluster <- paste0("patient_", 1:8) # 10 patients in total
+group <- rep(c("group1", "group2"), each = 4)
 
 design <- as.data.frame(cbind(cluster, group, ncells))
 design$cluster <- as.factor(design$cluster)
@@ -171,25 +181,27 @@ sum(ncells)
 
 ```{r}
 # simulate from poisson
-simulatedData_pois <- GEEutils::simulator(design = design,
-                                SimulationParameters = SimulationParameters, 
-                                nGenes = nGenes,
-                                distribution = distribution,
-                                fractionDGE = fractionDGE,
-                                foldchange = foldchange)
+simulatedData_pois <- GEEutils::simulator(
+    design = design,
+    SimulationParameters = SimulationParameters,
+    nGenes = nGenes,
+    distribution = distribution,
+    fractionDGE = fractionDGE,
+    foldchange = foldchange
+)
 
-simulatedData_pois[1:5,1:5]
+simulatedData_pois[1:5, 1:5]
 
 # set.seed(55)
 # simulatedData_NB <- GEEutils::simulator(design = design,
-#                               SimulationParameters = SimulationParameters, 
+#                               SimulationParameters = SimulationParameters,
 #                               nGenes = nGenes,
 #                               distribution = distribution,
 #                               fractionDGE = fractionDGE,
 #                               foldchange = foldchange)
-# 
+#
 # simulatedData_NB[1:5,1:5]
-# 
+#
 # sum(is.na(simulatedData_NB))
 # simulatedData_NB[is.na(simulatedData_NB)] <- 0 # not nice, resolve later
 ```
@@ -200,42 +212,52 @@ simulatedData_pois[1:5,1:5]
 ## original dataset
 ids <- as.data.frame(cbind(colnames(sce), sce$patient_id))
 colnames(ids) <- c("CellID", "IndividualID")
-dds1 <- DESeqDataSetFromMatrix(countData = assay(sce),
-                              colData = ids,
-                              design= ~ IndividualID)
+dds1 <- DESeqDataSetFromMatrix(
+    countData = assay(sce),
+    colData = ids,
+    design = ~IndividualID
+)
 
 ## dataset without gene correlations
 ids <- as.data.frame(cbind(colnames(sceNoCor), sce$patient_id))
 colnames(ids) <- c("CellID", "IndividualID")
-dds2 <- DESeqDataSetFromMatrix(countData = assay(sceNoCor),
-                              colData = ids,
-                              design= ~ IndividualID)
+dds2 <- DESeqDataSetFromMatrix(
+    countData = assay(sceNoCor),
+    colData = ids,
+    design = ~IndividualID
+)
 
 ## simulated dataset
-cluster <- rep(design$cluster,times=design$ncells)
-group <- rep(design$group,times=design$ncells)
+cluster <- rep(design$cluster, times = design$ncells)
+group <- rep(design$group, times = design$ncells)
 
 designCell <- as.data.frame(cbind(cluster, group))
 designCell$cluster <- as.factor(designCell$cluster)
 designCell$group <- as.factor(designCell$group)
 
-dds3 <- DESeqDataSetFromMatrix(countData = simulatedData_NB,
-                              colData = designCell,
-                              design= ~ cluster)
+dds3 <- DESeqDataSetFromMatrix(
+    countData = simulatedData_NB,
+    colData = designCell,
+    design = ~cluster
+)
 
-dds4 <- DESeqDataSetFromMatrix(countData = simulatedData_pois,
-                              colData = designCell,
-                              design= ~ cluster)
+dds4 <- DESeqDataSetFromMatrix(
+    countData = simulatedData_pois,
+    colData = designCell,
+    design = ~cluster
+)
 
 
 dds_list <- list(dds1, dds2, dds3, dds4)
 
 names(dds_list) <- c("Kang_CD14_filtered", "Kang_CD14_filtered_noCor", "SimulatedData_NB", "SimulatedData_pois")
 
-countsimQCReport(ddsList = dds_list, 
-                 outputFile = "countsim_report_kang_simulation.html",
-                 outputDir = getwd(), 
-                 outputFormat = "html_document",
-                 calculateStatistics = FALSE,
-                 forceOverwrite = TRUE)
+countsimQCReport(
+    ddsList = dds_list,
+    outputFile = "countsim_report_kang_simulation.html",
+    outputDir = getwd(),
+    outputFormat = "html_document",
+    calculateStatistics = FALSE,
+    forceOverwrite = TRUE
+)
 ```

@@ -11,8 +11,8 @@ vignette: >
 
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
+    collapse = TRUE,
+    comment = "#>"
 )
 ```
 
@@ -26,8 +26,8 @@ These estimators, along with several others, have already been implemented in R 
 
 # Install GEEutils
 
-```
-devtools::install_local("/Users/jg/Desktop/PhD/GEE/GEEutils", force = T, quiet = F)
+```{r, eval=FALSE}
+devtools::install_local(".", force = TRUE, quiet = FALSE)
 ```
 
 # Load libraries
@@ -39,6 +39,8 @@ library(geeM)
 library(geesmv)
 library(gee)
 library(sandwich)
+
+library(GEEutils)
 ```
 
 # Create data
@@ -49,11 +51,11 @@ Note: 10 clusters of size 50 is the minimal #number of clusters and cluster size
 
 ```{r}
 set.seed(77)
-gene1 <- rpois(500,3)
-group_id <- rep(c("control", "treat"), each=250)
-patient_id <- rep(paste0("patient", 1:10),each=50)
+gene1 <- rpois(500, 3)
+group_id <- rep(c("control", "treat"), each = 250)
+patient_id <- rep(paste0("patient", 1:10), each = 50)
 
-data <- as.data.frame(cbind(gene1,group_id,patient_id))
+data <- as.data.frame(cbind(gene1, group_id, patient_id))
 data$gene1 <- as.numeric(data$gene1)
 data$group_id <- as.factor(data$group_id)
 data$patient_id <- as.factor(data$patient_id)
@@ -65,11 +67,12 @@ data$patient_id <- as.factor(data$patient_id)
 
 ```{r}
 m1 <- geese(
-  formula = gene1 ~ group_id,
-  id = patient_id,
-  family = poisson,
-  data = data,
-  corstr = "exch")
+    formula = gene1 ~ group_id,
+    id = patient_id,
+    family = poisson,
+    data = data,
+    corstr = "exch"
+)
 
 m1$beta # estimates
 sqrt(diag(m1$vbeta.naiv)) # SE
@@ -80,11 +83,12 @@ sqrt(diag(m1$vbeta)) # sandwich SE
 
 ```{r,message=FALSE}
 m2 <- gee(
-  formula = gene1 ~ group_id,
-  id = patient_id,
-  data = data,
-  family = poisson,
-  corstr = "exchangeable")
+    formula = gene1 ~ group_id,
+    id = patient_id,
+    data = data,
+    family = poisson,
+    corstr = "exchangeable"
+)
 
 m2$coefficients # estimates
 sqrt(diag(m2$naive.variance)) # SE --> different from geese, but same as geeM with default useP
@@ -107,11 +111,12 @@ These were assessed in the paper but in another context.
 
 ```{r}
 m3 <- geem(
-  formula = gene1 ~ group_id,
-  id = patient_id,
-  family = poisson,
-  corstr = "exch",
-  useP = T)
+    formula = gene1 ~ group_id,
+    id = patient_id,
+    family = poisson,
+    corstr = "exch",
+    useP = TRUE
+)
 
 m3$beta # estimates
 sqrt(diag(m3$naiv.var)) # SE --> different from geese, but same if useP = FALSE (TRUE is default though)
@@ -125,11 +130,13 @@ Note; geesmv uses the gee package for fitting the GEE model with the sandwich es
 ## Liang and Zeger (LZ)
 
 ```{r,message=FALSE}
-lz.exch <- GEE.var.lz(formula = gene1 ~ group_id,
-                        id="patient_id",
-                        family="poisson",
-                        data=data,
-                        corstr="exchangeable") ##Exchangeable correlation structure;
+lz.exch <- GEE.var.lz(
+    formula = gene1 ~ group_id,
+    id = "patient_id",
+    family = "poisson",
+    data = data,
+    corstr = "exchangeable"
+) ## Exchangeable correlation structure;
 
 sqrt(lz.exch$cov.beta) # same sandwich SE (Liang and zeger)
 ```
@@ -137,11 +144,13 @@ sqrt(lz.exch$cov.beta) # same sandwich SE (Liang and zeger)
 ## Pan (Pan)
 
 ```{r,message=FALSE}
-pan.exch <- GEE.var.pan(formula = gene1 ~ group_id,
-                        id="patient_id",
-                        family="poisson",
-                        data=data,
-                        corstr="exchangeable") ##Exchangeable correlation structure;
+pan.exch <- GEE.var.pan(
+    formula = gene1 ~ group_id,
+    id = "patient_id",
+    family = "poisson",
+    data = data,
+    corstr = "exchangeable"
+) ## Exchangeable correlation structure;
 
 sqrt(pan.exch$cov.beta) # different SE --> same as model SE?? --> probably because Exch + all clusters same size
 ```
@@ -149,11 +158,13 @@ sqrt(pan.exch$cov.beta) # different SE --> same as model SE?? --> probably becau
 ## Kauermann and Carroll (KC)
 
 ```{r,message=FALSE}
-kc.exch <- GEE.var.kc(formula = gene1 ~ group_id,
-                      id="patient_id",
-                      family="poisson",
-                      data=data,
-                      corstr="exchangeable") ##Exchangeable correlation structure;
+kc.exch <- GEE.var.kc(
+    formula = gene1 ~ group_id,
+    id = "patient_id",
+    family = "poisson",
+    data = data,
+    corstr = "exchangeable"
+) ## Exchangeable correlation structure;
 
 sqrt(kc.exch$cov.beta) # different SE
 ```
@@ -167,13 +178,15 @@ In this context, it would be nice to have a wrapper / convenience function for G
 For our application, it would suffice to do this for a poisson link GEE only.
 
 ```{r, message=FALSE}
-test <- GEEutils::bakery(formula = gene1 ~ group_id,
-         id="patient_id",
-         data=data,
-         family="poisson",
-         corstr="exchangeable",
-         silent = TRUE,
-         extraSandwich = c("KC","Pan"))
+test <- GEEutils::bakery(
+    formula = gene1 ~ group_id,
+    id = "patient_id",
+    data = data,
+    family = "poisson",
+    corstr = "exchangeable",
+    silent = TRUE,
+    extraSandwich = c("KC", "Pan")
+)
 ```
 
 ```{r}
@@ -198,7 +211,7 @@ Adopting the sandwich package in a helper function that tests provided contrasts
 pois.model <- glm(gene1 ~ group_id, family = poisson, data = data)
 
 # regular SEs
-summary(pois.model)$coefficients[,2]
+summary(pois.model)$coefficients[, 2]
 ```
 
 ```{r}
@@ -210,33 +223,36 @@ sqrt(diag(sandwich(pois.model)))
 # GEEutils
 
 ## Requires a contrast matrix (could set a default coefficient if not provided)
-design <- model.matrix(~ group_id, data = data)
+design <- model.matrix(~group_id, data = data)
 L <- matrix(0, ncol = 1, nrow = ncol(design))
 rownames(L) <- colnames(design)
-L["group_idtreat",1] <- 1
+L["group_idtreat", 1] <- 1
 
 # no sandwich
 pois.res <- GEEutils::glm.Waldtest(
-                models =  list(pois.model), 
-                contrast = L[,1], 
-                sandwich = FALSE, 
-                adjust = FALSE)
+    models = list(pois.model),
+    contrast = L[, 1],
+    sandwich = FALSE,
+    adjust = FALSE
+)
 pois.res$se
 
 # LZ sandwich
 pois.res <- GEEutils::glm.Waldtest(
-                models =  list(pois.model), 
-                contrast = L[,1], 
-                sandwich = TRUE, 
-                adjust = FALSE)
+    models = list(pois.model),
+    contrast = L[, 1],
+    sandwich = TRUE,
+    adjust = FALSE
+)
 pois.res$se
 
 # LZ sandwich adjusted for small sample size
 pois.res <- GEEutils::glm.Waldtest(
-                models =  list(pois.model), 
-                contrast = L[,1], 
-                sandwich = TRUE, 
-                adjust = TRUE)
+    models = list(pois.model),
+    contrast = L[, 1],
+    sandwich = TRUE,
+    adjust = TRUE
+)
 
 pois.res$se
 ```
@@ -245,12 +261,12 @@ Note that the `glm.Waldtest` function is flexible towards "multi-contrast" setti
 
 ```{r}
 set.seed(77)
-gene1 <- c(rpois(500,3), rpois(500,2), rpois(500,4))
-group_id <- rep(c("control", "treat"), each=750)
-patient_id <- rep(paste0("patient", 1:10),each=150)
-cell_type <- rep(rep(c("type1", "type2", "type3"),each=50),10)
+gene1 <- c(rpois(500, 3), rpois(500, 2), rpois(500, 4))
+group_id <- rep(c("control", "treat"), each = 750)
+patient_id <- rep(paste0("patient", 1:10), each = 150)
+cell_type <- rep(rep(c("type1", "type2", "type3"), each = 50), 10)
 
-data <- as.data.frame(cbind(gene1,group_id,patient_id,cell_type))
+data <- as.data.frame(cbind(gene1, group_id, patient_id, cell_type))
 data$gene1 <- as.numeric(data$gene1)
 data$group_id <- as.factor(data$group_id)
 data$patient_id <- as.factor(data$patient_id)
@@ -258,54 +274,52 @@ data$cell_type <- as.factor(data$cell_type)
 ```
 
 ```{r}
-pois.model <- glm(gene1 ~ group_id*cell_type, family = poisson, data = data)
+pois.model <- glm(gene1 ~ group_id * cell_type, family = poisson, data = data)
 summary(pois.model)
 ```
 
 ```{r}
 # contrast matrix
-design <- model.matrix(~ group_id*cell_type, data = data)
+design <- model.matrix(~ group_id * cell_type, data = data)
 L <- matrix(0, ncol = 3, nrow = ncol(design))
 rownames(L) <- colnames(design)
-L["group_idtreat",1:3] <- 1
-L["group_idtreat:cell_typetype2",2] <- 1 
-L["group_idtreat:cell_typetype3",3] <- 1
+L["group_idtreat", 1:3] <- 1
+L["group_idtreat:cell_typetype2", 2] <- 1
+L["group_idtreat:cell_typetype3", 3] <- 1
 colnames(L) <- c("type1", "type2", "type3")
 L
 ```
 
 ```{r}
 # no sandwich
-pois.res <- lapply(seq_len(ncol(L)), function(i){
-    GEEutils::glm.Waldtest(models=list(pois.model),
-                 contrast=L[,i],
-                 sandwich=FALSE)
+pois.res <- lapply(seq_len(ncol(L)), function(i) {
+    GEEutils::glm.Waldtest(
+        models = list(pois.model),
+        contrast = L[, i],
+        sandwich = FALSE
+    )
 })
-unlist(pois.res)[c(2,7,12)]
+unlist(pois.res)[c(2, 7, 12)]
 
 # LZ sandwich
-pois.res <- lapply(seq_len(ncol(L)), function(i){
-    GEEutils::glm.Waldtest(models = list(pois.model),
-                 contrast = L[,i],
-                 sandwich = TRUE,
-                 adjust = FALSE)
+pois.res <- lapply(seq_len(ncol(L)), function(i) {
+    GEEutils::glm.Waldtest(
+        models = list(pois.model),
+        contrast = L[, i],
+        sandwich = TRUE,
+        adjust = FALSE
+    )
 })
-unlist(pois.res)[c(2,7,12)]
+unlist(pois.res)[c(2, 7, 12)]
 
 # LZ sandwich adjusted for small sample size
-pois.res <- lapply(seq_len(ncol(L)), function(i){
-    GEEutils::glm.Waldtest(models = list(pois.model),
-                 contrast = L[,i],
-                 sandwich = TRUE,
-                 adjust = TRUE)
+pois.res <- lapply(seq_len(ncol(L)), function(i) {
+    GEEutils::glm.Waldtest(
+        models = list(pois.model),
+        contrast = L[, i],
+        sandwich = TRUE,
+        adjust = TRUE
+    )
 })
-unlist(pois.res)[c(2,7,12)]
+unlist(pois.res)[c(2, 7, 12)]
 ```
-
-
-
-
-
-
-
-

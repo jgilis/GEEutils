@@ -2,27 +2,59 @@
 % Please edit documentation in R/glm.Waldtest.R
 \name{glm.Waldtest}
 \alias{glm.Waldtest}
-\title{Perform a Wald test on a glm with the possible of adopting robust standard errors}
+\title{Perform a Wald test on a glm with the possible of adopting robust standard
+errors}
 \usage{
 glm.Waldtest(models, contrast, sandwich = TRUE, adjust = FALSE)
 }
 \arguments{
-\item{models}{A list of generalized linear model. If a single model, make sure to input it as a list by `list(glm)`.}
+\item{models}{A list of generalized linear model. If a single model, make
+sure to input it as a list by `list(glm)`.}
 
-\item{contrast}{A `matrix` specifying the contrast, i.e. combinations of model parameters, of interest.}
+\item{contrast}{A `matrix` specifying the contrast, i.e. combinations of
+model parameters, of interest.}
 
-\item{sandwich}{A `logical` variable; should robust standard errors be computed (sandwich procedure by Liang and Zeger).
-Default is TRUE.}
+\item{sandwich}{A `logical` variable; should robust standard errors be
+computed (sandwich procedure by Liang and Zeger). Default is TRUE.}
 
-\item{adjust}{A `logical` variable; should a finite sample adjustment be made?
-This amounts to multiplication with n/(n-k) where n is the number of observations and k the number of estimated parameters.}
+\item{adjust}{A `logical` variable; should a finite sample adjustment be
+made? This amounts to multiplication with n/(n-k) where n is the number of
+observations and k the number of estimated parameters.}
 }
 \value{
-A `Dataframe` containing the requested model parameter estimates, (robust) standard errors, degrees of freedom,
- Wald test statistics and p-values.
+A `Dataframe` containing the requested model parameter estimates,
+  (robust) standard errors, degrees of freedom, Wald test statistics and
+  p-values.
 }
 \description{
-Perform a Wald test on a glm with the possible of adopting robust standard errors
+Perform a Wald test on a glm with the possible of adopting
+  robust standard errors
+}
+\examples{
+## Simulate single gene across 10 patients in 2 groups
+n_cells <- 500
+gene <- rpois(n_cells, 3)
+group_id <- factor(rep(c("control", "treat"), each = n_cells / 2))
+patient_id <- factor(rep(paste0("patient", 1:10), each = n_cells / 10))
+data <- data.frame(gene, group_id, patient_id)
+
+## Set up design and contrast
+design <- model.matrix(~group_id, data = data)
+L <- matrix(0, ncol = 1, nrow = ncol(design))
+rownames(L) <- colnames(design)
+L["group_idtreat", 1] <- 1
+
+## Fit Poisson model
+pois_model <- glm(gene ~ group_id, family = poisson, data = data)
+
+## Wald test with sandwich estimator and small sample-size adjustment
+res <- glm.Waldtest(
+    models = list(pois_model),
+    contrast = L[, 1],
+    sandwich = TRUE,
+    adjust = TRUE
+)
+
 }
 \author{
 Jeroen Gilis

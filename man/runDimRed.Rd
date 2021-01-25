@@ -7,23 +7,40 @@
 runDimRed(object, clustering, type = "TSNE", downsample = 500)
 }
 \arguments{
-\item{object}{A `SingleCellExperiment` instance. Must have 2D dimensionality reduced coordinates precomputed,
-which can be checked with `reducedDimNames(object)`.}
+\item{object}{A `SingleCellExperiment` instance. Must have 2D dimensionality
+reduced coordinates precomputed, which can be checked with
+`reducedDimNames(object)`.}
 
-\item{clustering}{A `character vector` indicating the categorical variable that is used to color the dimensionality reduction plot.
-Must be one of `colnames(colData(object))`.}
+\item{clustering}{A `character vector` indicating the categorical variable
+that is used to color the dimensionality reduction plot. Must be one of
+`colnames(colData(object))`.}
 
-\item{type}{A `character vector` indicating which dimensionality reduction method should be used for visualization.
-Must be one of `reducedDimNames(object)`. Defaults to "TSNE".}
+\item{type}{A `character vector` indicating which dimensionality reduction
+method should be used for visualization. Must be one of
+`reducedDimNames(object)`. Defaults to "TSNE".}
 
-\item{downsample}{Should there be a downsampling of the number of cells per cluster in the plot?
-Either `logical` FALSE if no downsampling is desired or a `numeric` indicating the maximum number of cells per cluster.}
+\item{downsample}{Should there be a downsampling of the number of cells per
+cluster in the plot? Either `logical` FALSE if no downsampling is desired
+or a `numeric` indicating the maximum number of cells per cluster.}
 }
 \value{
 Prints the dimensionality reduced plot directly to console.
 }
 \description{
-Wrapper function to produce a pretty dimensionality reduction plot
+Wrapper function to produce a pretty dimensionality reduction
+  plot
+}
+\examples{
+library(scuttle)
+sce <- mockSCE(ncells = 100, ngenes = 1000)
+sce <- logNormCounts(sce)
+sce <- scater::runTSNE(sce)
+
+## Simulate 4 random individuals
+sce$patient_id <- factor(rep(paste0("patient", 1:4), each = ncol(sce) / 4))
+
+runDimRed(sce, clustering = "patient_id", type = "TSNE", downsample = FALSE)
+
 }
 \author{
 Jeroen Gilis
