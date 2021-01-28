@@ -1,13 +1,14 @@
-#' Helper function to sample (empirically) parameters from the observed
-#' distribution of grandmeans and dropouts
-#' TODO: theoretically, I would sample amount=nGenes. However, in some but not 
-#' all cases, the approx function produces NA's, causing problems downstream.
-#' A quick and dirty solution is to sample a much larger number (10K),
-#' remove NAs, and sample nGenes from the remaining values.
-#' In the future, we should check the origin of the NAs, but also discuss 
-#' with Lieven if we should continue with the approx function (as suggested
-#' by Lieven) or use a different strategy, e.g. bootstraps.
-.sample_empirical <- function(sumStats, amount=10000){
+# Helper function to sample (empirically) parameters from the observed
+# distribution of grandmeans and dropouts
+.sample_empirical <- function(sumStats, nGenes, amount=10000){
+  
+  # TODO: theoretically, I would sample amount=nGenes. However, in some but not 
+  # all cases, the approx function produces NA's, causing problems downstream.
+  # A quick and dirty solution is to sample a much larger number (10K),
+  # remove NAs, and sample nGenes from the remaining values.
+  # In the future, we should check the origin of the NAs, but also discuss 
+  # with Lieven if we should continue with the approx function (as suggested
+  # by Lieven) or use a different strategy, e.g. bootstraps.
   
   GrandMean <- sumStats[which(sumStats$GrandMean > 0),"GrandMean"]
   pdf_of_GrandMean <- density(GrandMean)
@@ -73,7 +74,7 @@
 #'
 #' @return A `matrix` of simulated gene expression data.
 #'
-#' @rdname simulator
+#' @rdname empirical_simulator
 #'
 #' @author Jeroen Gilis
 #'
@@ -99,7 +100,7 @@
 #' design <- data.frame(cluster, group, ncells)
 #'
 #' ## Simulate using Poisson model
-#' sim_pois <- empirical_simulator(
+#' emp_sim_pois <- empirical_simulator(
 #'     object = sce,
 #'     clustering = "patient_id",
 #'     design = design,
@@ -141,7 +142,7 @@ empirical_simulator <- function(object,
                            clustering = clustering)
   
   ## sample empirically
-  empirical_sample <- .sample_empirical(sumStats)
+  empirical_sample <- .sample_empirical(sumStats, nGenes)
   
   for (i in seq_len(nGenes)) {
     

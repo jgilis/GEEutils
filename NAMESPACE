@@ -2,6 +2,7 @@
 
 export(bakery)
 export(correlationsBoxplot)
+export(empirical_simulator)
 export(getNoCor)
 export(getSimulationParameters)
 export(glm.Waldtest)
