@@ -26,6 +26,10 @@ More specifically, I have included three functions in GEEutils:
 
 - `simulator`: Simulate synthetic scRNA-Seq data based on hyperparameters obtained from a reference scRNA-Seq dataset with `getSimulationParameters`
 
+- `empirical_simulator`: similar to `simulator`, but obtains the parameters for
+  the `grandMean` and `dropOut` empirically, i.e. by sampling from the observed
+  empirical distributions
+
 Note that this code is almost identical to the one presented by Zimmerman et al. However, these authors assessed their methods only different types of scRNA-Seq data, i.e., Fluidigm's C1 protocol and the smartseq2 protocol. I will here work with the 10X Kang dataset. This has strong repercussions on the validity of the proposed methods. Therefore, adaptations must certainly be made in the future.
 
 ```{r, eval=FALSE}
@@ -144,6 +148,7 @@ SimulationParameters <- GEEutils::getSimulationParameters(
 
 SimulationParameters
 
+# could also do this on the sce that still has correlated genes
 # SimulationParameters <- GEEutils::getSimulationParameters(object = sce,
 #                                                 clustering = "patient_id",
 #                                                 plot = TRUE,
@@ -177,11 +182,11 @@ foldchange <- 1
 sum(ncells)
 ```
 
-# Simulate new data
+# Simulate new data (model)
 
 ```{r}
 # simulate from poisson
-simulatedData_pois <- GEEutils::simulator(
+simulated_pois <- GEEutils::simulator(
     design = design,
     SimulationParameters = SimulationParameters,
     nGenes = nGenes,
@@ -190,20 +195,42 @@ simulatedData_pois <- GEEutils::simulator(
     foldchange = foldchange
 )
 
-simulatedData_pois[1:5, 1:5]
+simulated_pois[1:5, 1:5]
 
 # set.seed(55)
-# simulatedData_NB <- GEEutils::simulator(design = design,
+# simulated_NB <- GEEutils::simulator(design = design,
 #                               SimulationParameters = SimulationParameters,
 #                               nGenes = nGenes,
 #                               distribution = distribution,
 #                               fractionDGE = fractionDGE,
 #                               foldchange = foldchange)
 #
-# simulatedData_NB[1:5,1:5]
+# simulated_NB[1:5,1:5]
 #
-# sum(is.na(simulatedData_NB))
-# simulatedData_NB[is.na(simulatedData_NB)] <- 0 # not nice, resolve later
+# sum(is.na(simulated_NB))
+# simulated_NB[is.na(simulated_NB)] <- 0 # not nice, resolve later
+```
+
+# Simulate new data (empirical)
+
+As opposed to the chunk above, we here use the `empirical_simulator` function
+which  obtains the parameters for the `grandMean` and `dropOut` empirically, 
+i.e. by sampling from the observed empirical distributions.
+
+```{r}
+# simulate from poisson
+emp_simulated_pois <- GEEutils::empirical_simulator(
+    object = sceNoCor,
+    clustering = "patient_id",
+    design = design,
+    SimulationParameters = SimulationParameters,
+    nGenes = nGenes,
+    distribution = distribution,
+    fractionDGE = fractionDGE,
+    foldchange = foldchange
+)
+
+simulated_pois[1:5, 1:5]
 ```
 
 # Make a countSimQC report of new data
@@ -236,13 +263,13 @@ designCell$cluster <- as.factor(designCell$cluster)
 designCell$group <- as.factor(designCell$group)
 
 dds3 <- DESeqDataSetFromMatrix(
-    countData = simulatedData_NB,
+    countData = simulated_NB,
     colData = designCell,
     design = ~cluster
 )
 
 dds4 <- DESeqDataSetFromMatrix(
-    countData = simulatedData_pois,
+    countData = simulated_pois,
     colData = designCell,
     design = ~cluster
 )
@@ -250,7 +277,7 @@ dds4 <- DESeqDataSetFromMatrix(
 
 dds_list <- list(dds1, dds2, dds3, dds4)
 
-names(dds_list) <- c("Kang_CD14_filtered", "Kang_CD14_filtered_noCor", "SimulatedData_NB", "SimulatedData_pois")
+names(dds_list) <- c("Kang_CD14_filtered", "Kang_CD14_filtered_noCor", "Simulated_NB", "Simulated_pois")
 
 countsimQCReport(
     ddsList = dds_list,
