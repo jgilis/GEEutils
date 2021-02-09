@@ -47,18 +47,28 @@ library(GEEutils)
 
 I simply create a single Poisson distributed random variable for demonstration purposes.
 
-Note: 10 clusters of size 50 is the minimal #number of clusters and cluster size in [Li and Redden]( https://doi.org/10.1002/sim.6344)
+Note: 10 clusters of size 50 is the minimal #number of clusters and cluster size in [Li and Redden](https://doi.org/10.1002/sim.6344)
 
 ```{r}
 set.seed(77)
 gene1 <- rpois(500, 3)
 group_id <- rep(c("control", "treat"), each = 250)
 patient_id <- rep(paste0("patient", 1:10), each = 50)
+# patient_id <- rep(paste0("patient", 1:10), 
+#                   times = c(30,40,50,60,70,70,60,50,40,30))
+#when the number of cells differs across patients, geesmv::GEE.var.pan breaks
 
 data <- as.data.frame(cbind(gene1, group_id, patient_id))
 data$gene1 <- as.numeric(data$gene1)
 data$group_id <- as.factor(data$group_id)
 data$patient_id <- as.factor(data$patient_id)
+```
+
+It is essential to sort the data according to subject `id`!
+
+```{r}
+data <- data[order(data$patient_id),] # sort on "id"
+head(data$patient_id)
 ```
 
 # Fit GEE 

@@ -65,6 +65,19 @@
             D %*% solve(step11) %*% t(D) %*% solve(Vi)) %*%
             (y - exp(covariate %*% beta_est))
         ##############
+        
+        # check and handle complex numbers from eigenvalues
+        if(any(is.complex(xy))){
+            message(paste0("Subject ", i, ": Complex numbers detected"))
+            xy <- zapsmall(xy)
+            if (all(Im(xy)==0)){
+                xy <- as.numeric(xy)
+                message(paste0("Subject ", i, ": All complex +0i, set to numeric"))
+            } else {
+                message(paste0("Subject ", i, ": At least some complex not +0i"))
+            }
+        }
+        
         step12 <- step12 + xy %*% t(xy)
         # TODO: could change matrixcalc::vec to c
         step13 <- step13 + matrixcalc::vec(xy %*% t(xy))
