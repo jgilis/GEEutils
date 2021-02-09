@@ -60,6 +60,8 @@
 #' @export
 correlationsBoxplot <- function(object, clustering) {
     message("Function still under construction")
+    
+    CellType <- Correlation <- Type <- NULL
 
     # wrangle data
     # FIXME: use of `@` heavily discouraged; use appropriate accessor instead

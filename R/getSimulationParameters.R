@@ -61,6 +61,7 @@
 
 # Compute hyperparameters related to dropout
 .getHyperDropout <- function(sumStats, plot) {
+    DropOut <- NULL
 
     # Dropout mean
     sumStats$DropOut <- 1 - sumStats$DropOut
@@ -113,6 +114,8 @@
 
 # Compute hyperparameters related to mean expression levels over all cells
 .getHyperGrandmean <- function(sumStats, plot) {
+    GrandMean <- NULL
+  
     sumStats <- sumStats[which(sumStats$GrandMean > 0), ]
 
     temp.fit.gamma <- suppressWarnings(
@@ -160,6 +163,8 @@
 
 # Compute hyperparameters describing the relationship between mean expression and inter-individual variability
 .getHyperRelationship1 <- function(sumStats, plot) {
+    GrandMean <- InterStD <- NULL
+  
     temp.mean.inter <- glm(
       data = sumStats, InterStD ~ 0 + GrandMean,
       family = gaussian(link = "identity")
@@ -201,6 +206,8 @@
 
 # Compute hyperparameters describing the relationship between intra-individual variability and expression dispersion
 .getHyperRelationship2 <- function(sumStats, plot) {
+    IntraMean <- Dispersion <- NULL
+  
     intravar <- na.omit(as.data.frame(cbind(
         unlist(sumStats[, which(grepl("Mean_", colnames(sumStats)))]),
         unlist(sumStats[, which(grepl("Var_", colnames(sumStats)))])
