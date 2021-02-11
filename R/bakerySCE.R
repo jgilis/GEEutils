@@ -74,7 +74,7 @@ bakerySCE <- function(object,
   
   counts <- assays(object)[["counts"]] #hard-coded to take assay "counts"
   data <- as.data.frame(colData(object))
-  design <- model.matrix(metadata(object)$formula)
+  design <- model.matrix(metadata(object)$formula, data = data)
   
   geefit <- lapply(1:nrow(counts), function(i) {
     
