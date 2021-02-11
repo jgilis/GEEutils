@@ -5,10 +5,10 @@
 \title{Compute robust standard error estimates using multiple sandwich strategies
 for SingleCellExperiment input}
 \usage{
-bakerySCE(SCE, id, corstr, extraSandwich = "none", family = "poisson")
+bakerySCE(object, id, corstr, extraSandwich = "none", family = "poisson")
 }
 \arguments{
-\item{SCE}{A `SingleCellExperiment` object}
+\item{object}{A `SingleCellExperiment` object}
 
 \item{id}{A `vector` which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
@@ -31,13 +31,15 @@ will be provided.}
 and variance functions. Currently, only "poisson" is supported.}
 }
 \value{
-An object of class "gee" including multiple sandwich estimators.
+An updated `SingleCellExperiment` object. The fitted GEE models for
+each gene can be retrieved from the `rowData` slot.
 }
 \description{
 Compute robust standard error estimates using multiple sandwich
   strategies for SingleCellExperiment input
 }
 \examples{
+# TODO update example to SCE
 ## Simulate single gene across 10 patients in 2 groups
 n_cells <- 500
 gene <- rpois(n_cells, 3)

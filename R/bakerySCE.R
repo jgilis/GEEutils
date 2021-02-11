@@ -4,7 +4,7 @@
 #' @description Compute robust standard error estimates using multiple sandwich
 #'   strategies for SingleCellExperiment input
 #'
-#' @param SCE A `SingleCellExperiment` object
+#' @param object A `SingleCellExperiment` object
 #'
 #' @param id A `vector` which identifies the clusters. The length of id should
 #'   be the same as the number of observations. Data are assumed to be sorted so
@@ -26,13 +26,15 @@
 #' @param family A `character string` indicating the family for defining link
 #'   and variance functions. Currently, only "poisson" is supported.
 #'
-#' @return An object of class "gee" including multiple sandwich estimators.
+#' @return An updated `SingleCellExperiment` object. The fitted GEE models for
+#' each gene can be retrieved from the `rowData` slot.
 #'
 #' @rdname bakerySCE
 #'
 #' @author Jeroen Gilis
 #'
 #' @examples
+#' # TODO update example to SCE
 #' ## Simulate single gene across 10 patients in 2 groups
 #' n_cells <- 500
 #' gene <- rpois(n_cells, 3)
@@ -64,15 +66,15 @@
 #' @importFrom SummarizedExperiment assays colData rowData rowData<-
 #'
 #' @export
-bakerySCE <- function(SCE, 
+bakerySCE <- function(object, 
                       id, 
                       corstr, 
                       extraSandwich = "none", 
                       family = "poisson") {
   
-  counts <- assays(SCE)[["counts"]] #hard-coded to take assay "counts"
-  data <- as.data.frame(colData(SCE))
-  design <- model.matrix(metadata(SCE)$formula)
+  counts <- assays(object)[["counts"]] #hard-coded to take assay "counts"
+  data <- as.data.frame(colData(object))
+  design <- model.matrix(metadata(object)$formula)
   
   geefit <- lapply(1:nrow(counts), function(i) {
     
@@ -89,6 +91,6 @@ bakerySCE <- function(SCE,
   
   names(geefit) <- rownames(counts)
   
-  rowData(SCE)[["geefit"]] <- geefit # store in rowData
-  return(SCE)
+  rowData(object)[["geefit"]] <- geefit # store in rowData
+  return(object)
 }
