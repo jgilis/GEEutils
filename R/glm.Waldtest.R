@@ -1,12 +1,11 @@
 # Extract model coefficients from a glm
-# TODO: quite trivial; remove?
-.getCoef <- function(model) {
+.glm_getCoef <- function(model) {
     model$coefficients
 }
 
 # Compute estimates for target contrast
-.getEstimates <- function(model, contrast) {
-    coef <- .getCoef(model)
+.glm_getEstimates <- function(model, contrast) {
+    coef <- .glm_getCoef(model)
     if (is.null(coef)) {
         coef <- rep(NA, times = nrow(contrast))
     }
@@ -15,7 +14,7 @@
 
 # Compute the standard error on a target model estimate
 #' @importFrom methods is
-.varContrast <- function(model, contrast) {
+.glm_varContrast <- function(model, contrast) {
     if (!any(is(model, "fitError"))) {
         sx <- summary(model) # maybe I can also only compute vcov to gain speed
         if (nrow(sx$cov.scaled) == length(contrast)) {
@@ -28,7 +27,7 @@
 # Compute the robust standard error on a target model estimate
 #' @importFrom methods is
 #' @importFrom sandwich sandwich
-.sandwichVarContrast <- function(model, contrast, adjust) {
+.glm_sandwichVarContrast <- function(model, contrast, adjust) {
     if (!any(is(model, "fitError"))) {
         # if adjust == TRUE: small sample adjustment, divide by n-k
         sanwich_var <- sandwich(model, adjust = adjust)
@@ -40,8 +39,7 @@
 }
 
 # Extract the degrees of freedom from a glm
-# TODO: quite trivial; remove?
-.getDf <- function(model) {
+.glm_getDf <- function(model) {
     model$df.residual
 }
 
@@ -104,13 +102,13 @@ glm.Waldtest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
     # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
     # TODO: convert 'models' to list internally? Makes using a single model
     # bit more intuitive
-    estimates <- sapply(models, .getEstimates, contrast = contrast)
+    estimates <- sapply(models, .glm_getEstimates, contrast = contrast)
     if (sandwich) {
-        se <- sapply(models, .sandwichVarContrast, contrast = contrast, adjust) # uses sandwich SEs
+        se <- sapply(models, .glm_sandwichVarContrast, contrast = contrast, adjust) # uses sandwich SEs
     } else {
-        se <- sapply(models, .varContrast, contrast = contrast) # uses GLM SEs
+        se <- sapply(models, .glm_varContrast, contrast = contrast) # uses GLM SEs
     }
-    dfs <- sapply(models, .getDf)
+    dfs <- sapply(models, .glm_getDf)
 
     W_stats <- estimates / sqrt(se) # Wald statistics
     pvals <- 2 * pt(abs(W_stats), df = dfs, lower.tail = FALSE)

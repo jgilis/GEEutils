@@ -25,7 +25,7 @@
     }
     #####
 
-    cov.beta <- unstr <- matrix(0, nrow = len, ncol = len)
+    cov.beta <- matrix(0, nrow = len, ncol = len)
     step11 <- matrix(0, nrow = len, ncol = len)
     for (i in 1:size) {
         y <- as.matrix(data$response[data$id == unique(data$id)[i]])
@@ -122,8 +122,7 @@
     }
     #####
 
-    # NOTE: `unstr` is not used (redefined later)
-    cov.beta <- unstr <- matrix(0, nrow = len, ncol = len)
+    cov.beta <- matrix(0, nrow = len, ncol = len)
     step <- matrix(0, nrow = cluster$n[1], ncol = cluster$n[1])
     for (i in 1:size) {
         y <- as.matrix(data$response[data$id == unique(data$id)[i]])
@@ -207,9 +206,6 @@
 #'   "fixed", "stat_M_dep", "non_stat_M_dep", "exchangeable", "AR-M" and
 #'   "unstructured".
 #'
-#' @param silent A `logical` variable controlling whether parameter estimates at
-#'   each iteration are printed.
-#'
 #' @param extraSandwich A `character vector` of sandwich estimation procedures
 #'   that must be used to compute robust standard errors, additional to the
 #'   model standard error and the robust estimator from Liang and Zeger. The
@@ -238,7 +234,6 @@
 #'     data = data,
 #'     family = "poisson",
 #'     corstr = "exchangeable",
-#'     silent = TRUE,
 #'     extraSandwich = c("KC", "Pan")
 #' )
 #'
@@ -259,7 +254,6 @@ bakery <- function(formula,
                    id, data,
                    family,
                    corstr,
-                   silent = TRUE,
                    extraSandwich = "none") {
     if (is.null(data$id)) {
         index <- which(names(data) == id)
@@ -285,7 +279,7 @@ bakery <- function(formula,
         id = id,
         family = family,
         corstr = corstr,
-        silent = silent
+        silent = TRUE
     )
 
     if ("none" %in% extraSandwich) {
@@ -299,5 +293,7 @@ bakery <- function(formula,
     if ("Pan" %in% extraSandwich) {
         gee.fit$Pan.variance <- .bakery_Pan(gee.fit, data, mat, corstr)
     }
-    gee.fit
+    # only return what will be used later
+    gee.fit <- gee.fit[grepl("variance|coefficients", names(gee.fit))]
+    return(gee.fit)
 }
