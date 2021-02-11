@@ -1,5 +1,4 @@
 # Extract model coefficients from a glm
-# TODO: quite trivial; remove?
 .getCoef <- function(model) {
     model$coefficients
 }
@@ -40,7 +39,6 @@
 }
 
 # Extract the degrees of freedom from a glm
-# TODO: quite trivial; remove?
 .getDf <- function(model) {
     model$df.residual
 }

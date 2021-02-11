@@ -52,7 +52,6 @@ out <- bakery(
     data = data,
     family = "poisson",
     corstr = "exchangeable",
-    silent = TRUE,
     extraSandwich = c("KC", "Pan")
 )
 
