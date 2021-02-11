@@ -47,7 +47,6 @@
 #'     data = data,
 #'     family = "poisson",
 #'     corstr = "exchangeable",
-#'     silent = TRUE,
 #'     extraSandwich = c("KC", "Pan")
 #' )
 #'
@@ -84,14 +83,12 @@ bakerySCE <- function(SCE,
       data = data,
       family = family,
       corstr = corstr,
-      silent = TRUE, #TODO: remove in bakery
       extraSandwich = extraSandwich
     ))
   })
   
   names(geefit) <- rownames(counts)
   
-  #TODO: retain only what's necessary from GEE
   rowData(SCE)[["geefit"]] <- geefit # store in rowData
   return(SCE)
 }

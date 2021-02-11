@@ -293,5 +293,7 @@ bakery <- function(formula,
     if ("Pan" %in% extraSandwich) {
         gee.fit$Pan.variance <- .bakery_Pan(gee.fit, data, mat, corstr)
     }
-    gee.fit
+    # only return what will be used later
+    gee.fit <- gee.fit[grepl("variance|coefficients", names(gee.fit))]
+    return(gee.fit)
 }
