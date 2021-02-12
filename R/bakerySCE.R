@@ -19,9 +19,9 @@
 #' @param extraSandwich A `character vector` of sandwich estimation procedures
 #'   that must be used to compute robust standard errors, additional to the
 #'   model standard error and the robust estimator from Liang and Zeger. The
-#'   following are permitted: "KC" and "Pan". If not specified or set to "none",
-#'   only the model standard error and the robust estimator from Liang and Zeger
-#'   will be provided.
+#'   following are permitted: "none", "DF", "KC" and "Pan". If not specified or 
+#'   set to "none", only the naive model standard error and the robust estimator 
+#'   from Liang and Zeger will be provided.
 #'
 #' @param family A `character string` indicating the family for defining link
 #'   and variance functions. Currently, only "poisson" is supported.
@@ -88,7 +88,6 @@ bakerySCE <- function(object,
       extraSandwich = extraSandwich
     ))
   })
-  
   names(geefit) <- rownames(counts)
   
   rowData(object)[["geefit"]] <- geefit # store in rowData
