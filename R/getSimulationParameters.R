@@ -1,7 +1,7 @@
 # Compute summary statistics of the scRNA-Seq dataset that will later be used to compute simulation parameters
+#' @importFrom SummarizedExperiment assays
 .getSumStats <- function(object, clustering) {
-    # FIXME: use of `@` heavily discouraged; use appropriate accessor instead
-    counts <- as.data.frame(as.matrix(object@assays@data[[1]]))
+    counts <- as.data.frame(as.matrix(assays(object)[["counts"]]))
     nclust <- length(levels(as.factor(object[[clustering]])))
 
     computevar <- function(x) {
