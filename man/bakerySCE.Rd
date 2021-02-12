@@ -39,32 +39,21 @@ Compute robust standard error estimates using multiple sandwich
   strategies for SingleCellExperiment input
 }
 \examples{
-# TODO update example to SCE
-## Simulate single gene across 10 patients in 2 groups
-n_cells <- 500
-gene <- rpois(n_cells, 3)
-group_id <- factor(rep(c("control", "treat"), each = n_cells / 2))
-patient_id <- factor(rep(paste0("patient", 1:10), each = n_cells / 10))
-data <- data.frame(gene, group_id, patient_id)
+set.seed(011235)
+sce <- scuttle::mockSCE(ncells = 400, ngenes = 10)
+sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
+sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 
-## Run bakery with KC and Pan extra sandwiches
-out <- bakery(
-    formula = gene ~ group_id,
-    id = "patient_id",
-    data = data,
-    family = "poisson",
-    corstr = "exchangeable",
-    extraSandwich = c("KC", "Pan")
-)
+MultiAssayExperiment::metadata(sce)$formula <- ~sce$group_id
 
-## Liang-Zeger variance estimates
-diag(out$robust.variance)
+sce_fitted <- bakerySCE(object = sce,
+                        id = "patient_id",
+                        corstr = "independence",
+                        extraSandwich = "none",
+                        family = "poisson") 
 
-## KC variance estimates
-diag(out$KC.variance)
-
-## Pan variance estimates
-diag(out$Pan.variance)
+## Model fit for gene "Gene_0001"
+SummarizedExperiment::rowData(sce_fitted)[["geefit"]]$Gene_0001
 
 }
 \author{

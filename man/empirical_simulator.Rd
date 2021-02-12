@@ -53,7 +53,8 @@ Simulate a synthetic scRNA-Seq dataset based on parameters
 }
 \examples{
 ## Original data to simulate from
-sce <- scuttle::mockSCE(ncells = 100, ngenes = 1000)
+set.seed(011235)
+sce <- scuttle::mockSCE(ncells = 100, ngenes = 100)
 
 ## Add 4 random individuals
 sce$patient_id <- factor(rep(paste0("patient", 1:4), each = ncol(sce) / 4))
