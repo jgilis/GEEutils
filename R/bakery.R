@@ -289,7 +289,7 @@ bakery <- function(formula,
     if ("DF" %in% extraSandwich) {
         K <- nlevels(as.factor(gee.fit$id)) # number of clusters
         p <- length(gee.fit$coefficients) # number of parameters
-        gee.fit$DF.variance <- gee.fit$robust.variance * (K/K-p)
+        gee.fit$DF.variance <- gee.fit$robust.variance * (K/(K-p))
     }
 
     if ("KC" %in% extraSandwich) {
