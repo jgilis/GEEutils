@@ -84,8 +84,9 @@ gee.Waldtest <- function(object, contrast, SE){
   estimates <- sapply(models, .gee_getEstimates, contrast = contrast)
   var <- sapply(models, .gee_varContrast, contrast = contrast, SE = SE)
   
-  W_stats <- estimates/sqrt(var)
+  se <- sqrt(var)
+  W_stats <- estimates / se
   pvals <- 2 * pnorm(abs(W_stats), lower.tail = FALSE) # Z-stat
-  data.frame(estimates, var, W_stats, pvals)
+  data.frame(estimates, se, W_stats, pvals)
 }
 

@@ -24,15 +24,15 @@
     NA
 }
 
-# Compute the robust standard error on a target model estimate
+# Compute the robust variance on a target model estimate
 #' @importFrom methods is
 #' @importFrom sandwich sandwich
 .glm_sandwichVarContrast <- function(model, contrast, adjust) {
     if (!any(is(model, "fitError"))) {
-        # if adjust == TRUE: small sample adjustment, divide by n-k
+        # if adjust == TRUE: small sample adjustment, multiply by n/(n-k)
         sanwich_var <- sandwich(model, adjust = adjust)
         if (nrow(sanwich_var) == length(contrast)) {
-            return(sqrt(diag(t(contrast) %*% sanwich_var %*% contrast)))
+            return(diag(t(contrast) %*% sanwich_var %*% contrast))
         }
     }
     NA
@@ -104,13 +104,14 @@ glm.Waldtest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
     # bit more intuitive
     estimates <- sapply(models, .glm_getEstimates, contrast = contrast)
     if (sandwich) {
-        se <- sapply(models, .glm_sandwichVarContrast, contrast = contrast, adjust) # uses sandwich SEs
+        var <- sapply(models, .glm_sandwichVarContrast, contrast = contrast, adjust) # uses sandwich SEs
     } else {
-        se <- sapply(models, .glm_varContrast, contrast = contrast) # uses GLM SEs
+        var <- sapply(models, .glm_varContrast, contrast = contrast) # uses GLM SEs
     }
     dfs <- sapply(models, .glm_getDf)
-
-    W_stats <- estimates / sqrt(se) # Wald statistics
+    
+    se <- sqrt(var) # standard error
+    W_stats <- estimates / se # Wald statistics
     pvals <- 2 * pt(abs(W_stats), df = dfs, lower.tail = FALSE)
 
     data.frame(estimates, se, dfs, W_stats, pvals)
