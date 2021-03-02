@@ -7,28 +7,28 @@
 runDimRed(object, clustering, type = "TSNE", downsample = 500)
 }
 \arguments{
-\item{object}{A `SingleCellExperiment` instance. Must have 2D dimensionality
+\item{object}{A \code{SingleCellExperiment} instance. Must have 2D dimensionality
 reduced coordinates precomputed, which can be checked with
-`reducedDimNames(object)`.}
+\code{reducedDimNames(object)}.}
 
-\item{clustering}{A `character vector` indicating the categorical variable
+\item{clustering}{A \verb{character vector} indicating the categorical variable
 that is used to color the dimensionality reduction plot. Must be one of
-`colnames(colData(object))`.}
+\code{colnames(colData(object))}.}
 
-\item{type}{A `character vector` indicating which dimensionality reduction
+\item{type}{A \verb{character vector} indicating which dimensionality reduction
 method should be used for visualization. Must be one of
-`reducedDimNames(object)`. Defaults to "TSNE".}
+\code{reducedDimNames(object)}. Defaults to "TSNE".}
 
 \item{downsample}{Should there be a downsampling of the number of cells per
-cluster in the plot? Either `logical` FALSE if no downsampling is desired
-or a `numeric` indicating the maximum number of cells per cluster.}
+cluster in the plot? Either \code{logical} FALSE if no downsampling is desired
+or a \code{numeric} indicating the maximum number of cells per cluster.}
 }
 \value{
 Prints the dimensionality reduced plot directly to console.
 }
 \description{
 Wrapper function to produce a pretty dimensionality reduction
-  plot
+plot
 }
 \examples{
 library(scuttle)

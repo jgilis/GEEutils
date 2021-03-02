@@ -7,21 +7,21 @@
 correlationsBoxplot(object, clustering, assay = NULL)
 }
 \arguments{
-\item{object}{A `SingleCellExperiment` object.}
+\item{object}{A \code{SingleCellExperiment} object.}
 
-\item{clustering}{A `character` string indicating from which individual each
+\item{clustering}{A \code{character} string indicating from which individual each
 cells originates}
 
-\item{assay}{A `character` specifying which `assay` from the
-`SingleCellExperiment` to use. If `NULL` will use the first one in
-`assayNames(object)`.}
+\item{assay}{A \code{character} specifying which \code{assay} from the
+\code{SingleCellExperiment} to use. If \code{NULL} will use the first one in
+\code{assayNames(object)}.}
 }
 \value{
-A `ggplot` object.
+A \code{ggplot} object.
 }
 \description{
 Visualize inter- and intra-individual correlations by means of
-  boxplots
+boxplots
 }
 \author{
 Jeroen Gilis

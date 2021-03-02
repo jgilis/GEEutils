@@ -8,30 +8,30 @@ bakery(formula, id, data, family, corstr, extraSandwich = "none")
 }
 \arguments{
 \item{formula}{A formula expression as for other regression models, of the
-form response ~ predictors. See the documentation of `lm` and `formula` for
+form response ~ predictors. See the documentation of \code{lm} and \code{formula} for
 details.}
 
-\item{id}{A `vector` which identifies the clusters. The length of id should
+\item{id}{A \code{vector} which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
 that observations on a cluster are contiguous rows for all entities in the
 formula.}
 
-\item{data}{An optional `data frame` in which to interpret the variables
+\item{data}{An optional \verb{data frame} in which to interpret the variables
 occurring in the formula, along with the id and n variables.}
 
-\item{family}{A `character string` indicating the family for defining link
+\item{family}{A \verb{character string} indicating the family for defining link
 and variance functions. Currently, only "poisson" is supported.}
 
-\item{corstr}{A `character string` specifying the correlation structure.
+\item{corstr}{A \verb{character string} specifying the correlation structure.
 Default is "exchangeable". The following are permitted: "independence",
 "fixed", "stat_M_dep", "non_stat_M_dep", "exchangeable", "AR-M" and
 "unstructured".}
 
-\item{extraSandwich}{A `character vector` of sandwich estimation procedures
+\item{extraSandwich}{A \verb{character vector} of sandwich estimation procedures
 that must be used to compute robust standard errors, additional to the
 model standard error and the robust estimator from Liang and Zeger. The
-following are permitted: "none", "DF", "KC" and "Pan". If not specified or 
-set to "none", only the naive model standard error and the robust estimator 
+following are permitted: "none", "DF", "KC" and "Pan". If not specified or
+set to "none", only the naive model standard error and the robust estimator
 from Liang and Zeger will be provided.}
 }
 \value{
@@ -39,7 +39,7 @@ An object of class "gee" including multiple sandwich estimators.
 }
 \description{
 Compute robust standard error estimates using multiple sandwich
-  strategies
+strategies
 }
 \examples{
 ## Simulate single gene across 10 patients in 2 groups

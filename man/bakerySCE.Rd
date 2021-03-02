@@ -8,35 +8,35 @@ for SingleCellExperiment input}
 bakerySCE(object, id, corstr, extraSandwich = "none", family = "poisson")
 }
 \arguments{
-\item{object}{A `SingleCellExperiment` object}
+\item{object}{A \code{SingleCellExperiment} object}
 
-\item{id}{A `vector` which identifies the clusters. The length of id should
+\item{id}{A \code{vector} which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
 that observations on a cluster are contiguous rows for all entities in the
 formula.}
 
-\item{corstr}{A `character string` specifying the correlation structure.
+\item{corstr}{A \verb{character string} specifying the correlation structure.
 Default is "exchangeable". The following are permitted: "independence",
 "fixed", "stat_M_dep", "non_stat_M_dep", "exchangeable", "AR-M" and
 "unstructured".}
 
-\item{extraSandwich}{A `character vector` of sandwich estimation procedures
+\item{extraSandwich}{A \verb{character vector} of sandwich estimation procedures
 that must be used to compute robust standard errors, additional to the
 model standard error and the robust estimator from Liang and Zeger. The
 following are permitted: "none", "DF", "KC" and "Pan". If not specified or
 set to "none", only the naive model standard error and the robust estimator
 from Liang and Zeger will be provided.}
 
-\item{family}{A `character string` indicating the family for defining link
+\item{family}{A \verb{character string} indicating the family for defining link
 and variance functions. Currently, only "poisson" is supported.}
 }
 \value{
-An updated `SingleCellExperiment` object. The fitted GEE models for
-each gene can be retrieved from the `rowData` slot.
+An updated \code{SingleCellExperiment} object. The fitted GEE models for
+each gene can be retrieved from the \code{rowData} slot.
 }
 \description{
 Compute robust standard error estimates using multiple sandwich
-  strategies for SingleCellExperiment input
+strategies for SingleCellExperiment input
 }
 \examples{
 library(scuttle)
