@@ -4,13 +4,17 @@
 \alias{correlationsBoxplot}
 \title{Visualize inter- and intra-individual correlations by means of boxplots}
 \usage{
-correlationsBoxplot(object, clustering)
+correlationsBoxplot(object, clustering, assay = NULL)
 }
 \arguments{
 \item{object}{A `SingleCellExperiment` object.}
 
 \item{clustering}{A `character` string indicating from which individual each
 cells originates}
+
+\item{assay}{A `character` specifying which `assay` from the
+`SingleCellExperiment` to use. If `NULL` will use the first one in
+`assayNames(object)`.}
 }
 \value{
 A `ggplot` object.

@@ -33,15 +33,18 @@
 #'
 #' @export
 #' @importFrom methods is
+#' @importFrom SummarizedExperiment assayNames assays
 getNoCor <- function(object,
                      nFeatures = 500,
                      method = "spearman",
                      cutoff = 0.25) {
+    # TODO: remove `as.data.frame` conversions, cor works with matrices
     if (is(object, "matrix")) {
         counts <- as.data.frame(t(object)) # transpose necessary for cor function
-    } else if (is(object, "SingleCellExperiment")) { # TODO: replace with 'SummarizedExepriment'?
-        # FIXME: use of `@` heavily discouraged; use appropriate accessor instead
-        counts <- as.data.frame(t(as.matrix(object@assays@data[[1]]))) # transpose necessary for cor function
+    } else if (is(object, "SummarizedExperiment")) {
+        stopifnot("counts" %in% assayNames(object))
+        counts <- assays(object)[["counts"]]
+        counts <- as.data.frame(t(as.matrix(counts))) # transpose necessary for cor function
     } else {
         stop(
           "The provided object is not a matrix nor a SingleCellExperiment",

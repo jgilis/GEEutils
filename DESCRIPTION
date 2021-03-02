@@ -25,7 +25,8 @@ Imports:
     sandwich,
     utils,
     methods,
-    S4Vectors
+    S4Vectors,
+    Matrix
 Suggests:
     knitr,
     rmarkdown,
@@ -36,7 +37,6 @@ Suggests:
     magrittr,
     dplyr,
     SingleCellExperiment,
-    Matrix,
     geepack,
     geeM,
     scuttle
