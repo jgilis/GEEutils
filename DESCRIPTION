@@ -17,7 +17,6 @@ Imports:
     ggplot2,
     fitdistrplus,
     SummarizedExperiment,
-    MultiAssayExperiment,
     stats,
     gee,
     matrixcalc,
@@ -25,7 +24,8 @@ Imports:
     geesmv,
     sandwich,
     utils,
-    methods
+    methods,
+    S4Vectors
 Suggests:
     knitr,
     rmarkdown,

@@ -70,22 +70,23 @@ res <- glm.Waldtest(
     adjust = TRUE
 )
 
+library(scuttle)
 set.seed(011235)
-sce <- scuttle::mockSCE(ncells = 400, ngenes = 10)
+sce <- mockSCE(ncells = 400, ngenes = 10)
 sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
 sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 
-MultiAssayExperiment::metadata(sce)$formula <- ~sce$group_id
+metadata(sce)$formula <- ~sce$group_id
 
 ## Fit models with bakerySCE
 sce_fitted <- bakerySCE(object = sce,
                         id = "patient_id",
                         corstr = "independence",
                         extraSandwich = "none",
-                        family = "poisson") 
+                        family = "poisson")
 
 ## Set up design and contrast
-design <- stats::model.matrix(~group_id, data = SummarizedExperiment::colData(sce))
+design <- model.matrix(~group_id, data = colData(sce))
 L <- matrix(data = 0, ncol = 1, nrow = ncol(design)) # single contrast
 rownames(L) <- colnames(design)
 L["group_idgroup2",1] <- 1
