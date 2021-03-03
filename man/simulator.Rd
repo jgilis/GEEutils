@@ -15,33 +15,33 @@ simulator(
 )
 }
 \arguments{
-\item{design}{A `data frame` containing 3 columns. Column `cluster` is a
-`factor` that specifies the clustering of the observations. Column `group`
-is a `factor` that specifies to which (treatment) group the observations
-belong. Column `ncells` is a `numeric`indicating the number of cells
+\item{design}{A \verb{data frame} containing 3 columns. Column \code{cluster} is a
+\code{factor} that specifies the clustering of the observations. Column \code{group}
+is a \code{factor} that specifies to which (treatment) group the observations
+belong. Column \code{ncells} is a \code{numeric}indicating the number of cells
 belonging to each of the clusters.}
 
-\item{SimulationParameters}{A `list` of simulation parameters obtained with
-the `GEEutils::getSimulationParameters`.}
+\item{SimulationParameters}{A \code{list} of simulation parameters obtained with
+the \code{GEEutils::getSimulationParameters}.}
 
-\item{nGenes}{A `numeric` indicating hoe many genes should be simulated.}
+\item{nGenes}{A \code{numeric} indicating hoe many genes should be simulated.}
 
-\item{distribution}{A `character` indicating from which baseline distribution
+\item{distribution}{A \code{character} indicating from which baseline distribution
 the data should be sampled. Either "NB" or "poisson".}
 
-\item{fractionDGE}{A `numeric` between 0 and 1, indicating the fraction of
+\item{fractionDGE}{A \code{numeric} between 0 and 1, indicating the fraction of
 differentially expressed genes in the simulated data. Defaults to zero.}
 
-\item{foldchange}{A `numeric` indicating the size of differential expression
+\item{foldchange}{A \code{numeric} indicating the size of differential expression
 in terms of a fold change. Defaults to 1 (not differentially expressed,
 mock dataset).}
 }
 \value{
-A `matrix` of simulated gene expression data.
+A \code{matrix} of simulated gene expression data.
 }
 \description{
 Simulate a synthetic scRNA-Seq dataset based on parameters
-  obtained with getSimulationParameters
+obtained with getSimulationParameters
 }
 \examples{
 ## Original data to simulate from

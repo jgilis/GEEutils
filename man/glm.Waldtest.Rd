@@ -12,36 +12,36 @@ gee.Waldtest(object, contrast, SE)
 }
 \arguments{
 \item{models}{A list of generalized linear model. If a single model, make
-sure to input it as a list by `list(glm)`.}
+sure to input it as a list by \code{list(glm)}.}
 
-\item{contrast}{A `matrix` specifying the contrast, i.e. combinations of
+\item{contrast}{A \code{matrix} specifying the contrast, i.e. combinations of
 model parameters, of interest.}
 
-\item{sandwich}{A `logical` variable; should robust standard errors be
+\item{sandwich}{A \code{logical} variable; should robust standard errors be
 computed (sandwich procedure by Liang and Zeger). Default is TRUE.}
 
-\item{adjust}{A `logical` variable; should a finite sample adjustment be
+\item{adjust}{A \code{logical} variable; should a finite sample adjustment be
 made? This amounts to multiplication with n/(n-k) where n is the number of
 observations and k the number of estimated parameters.}
 
-\item{object}{A `SingleCellExperiment` object that already contains fitted
-GEE models in the `rowData` slot of the object, as obtained with the GEEutils
-function `bakerySCE`.}
+\item{object}{A \code{SingleCellExperiment} object that already contains fitted
+GEE models in the \code{rowData} slot of the object, as obtained with the GEEutils
+function \code{bakerySCE}.}
 
-\item{SE}{A `character string` that indicates}
+\item{SE}{A \verb{character string} that indicates}
 }
 \value{
-A `Dataframe` containing the requested model parameter estimates,
-  (robust) standard errors, degrees of freedom, Wald test statistics and
-  p-values.
+A \code{Dataframe} containing the requested model parameter estimates,
+(robust) standard errors, degrees of freedom, Wald test statistics and
+p-values.
 
-A `Dataframe` containing the requested model parameter estimates,
-  (robust) standard errors, degrees of freedom, Wald test statistics and
-  p-values.
+A \code{Dataframe} containing the requested model parameter estimates,
+(robust) standard errors, degrees of freedom, Wald test statistics and
+p-values.
 }
 \description{
 Perform a Wald test on a glm with the possible of adopting
-  robust standard errors
+robust standard errors
 
 Perform a Wald test on GEE models
 }
@@ -70,22 +70,23 @@ res <- glm.Waldtest(
     adjust = TRUE
 )
 
+library(scuttle)
 set.seed(011235)
-sce <- scuttle::mockSCE(ncells = 400, ngenes = 10)
+sce <- mockSCE(ncells = 400, ngenes = 10)
 sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
 sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 
-MultiAssayExperiment::metadata(sce)$formula <- ~sce$group_id
+metadata(sce)$formula <- ~sce$group_id
 
 ## Fit models with bakerySCE
 sce_fitted <- bakerySCE(object = sce,
                         id = "patient_id",
                         corstr = "independence",
                         extraSandwich = "none",
-                        family = "poisson") 
+                        family = "poisson")
 
 ## Set up design and contrast
-design <- stats::model.matrix(~group_id, data = SummarizedExperiment::colData(sce))
+design <- model.matrix(~group_id, data = colData(sce))
 L <- matrix(data = 0, ncol = 1, nrow = ncol(design)) # single contrast
 rownames(L) <- colnames(design)
 L["group_idgroup2",1] <- 1

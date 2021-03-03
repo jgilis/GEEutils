@@ -8,24 +8,24 @@ scRNA-Seq dataset.}
 getSimulationParameters(object, clustering, plot = TRUE, verbose = FALSE)
 }
 \arguments{
-\item{object}{A `SingleCellExperiment` instance.}
+\item{object}{A \code{SingleCellExperiment} instance.}
 
-\item{clustering}{A `character vector` indicating the categorical variable
+\item{clustering}{A \verb{character vector} indicating the categorical variable
 that is used to color the dimensionality reduction plot. Must be one of
-`colnames(colData(object))`.}
+\code{colnames(colData(object))}.}
 
-\item{plot}{`Logical` TRUE or FALSE; should intermediate visualizations be
+\item{plot}{\code{Logical} TRUE or FALSE; should intermediate visualizations be
 generated?}
 
-\item{verbose}{`Logical` TRUE or FALSE; should progress be printed?}
+\item{verbose}{\code{Logical} TRUE or FALSE; should progress be printed?}
 }
 \value{
-A `list` of 10 parameters that can be used to simulate synthetic
-  scRNA-Seq datasets
+A \code{list} of 10 parameters that can be used to simulate synthetic
+scRNA-Seq datasets
 }
 \description{
 Extract parameters from a scRNA-Seq dataset that are relevant
-  for simulating synthetic asRNA-Seq data.
+for simulating synthetic asRNA-Seq data.
 }
 \examples{
 sce <- scuttle::mockSCE(ncells = 100, ngenes = 1000)

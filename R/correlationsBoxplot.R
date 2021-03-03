@@ -49,6 +49,10 @@
 #' @param clustering A `character` string indicating from which individual each
 #'   cells originates
 #'
+#' @param assay A `character` specifying which `assay` from the
+#'   `SingleCellExperiment` to use. If `NULL` will use the first one in
+#'   `assayNames(object)`.
+#'
 #' @return A `ggplot` object.
 #'
 #' @rdname correlationsBoxplot
@@ -56,16 +60,23 @@
 #' @author Jeroen Gilis
 #'
 #' @import ggplot2
+#' @importFrom Matrix t
+#' @importFrom SummarizedExperiment assayNames assays
 #'
 #' @export
-correlationsBoxplot <- function(object, clustering) {
+correlationsBoxplot <- function(object, clustering, assay = NULL) {
     message("Function still under construction")
-    
+
     CellType <- Correlation <- Type <- NULL
 
+    if (is.null(assay)) {
+        assay <- assayNames(object)[[1]]
+    }
+    stopifnot(assay %in% assayNames(object))
+
     # wrangle data
-    # FIXME: use of `@` heavily discouraged; use appropriate accessor instead
-    data <- as.data.frame(t(as.matrix(object@assays@data@listData$counts)))
+    # TODO: could probably avoid conversions to matrix and data.frame
+    data <- as.data.frame(as.matrix(t(assays(object)[[assay]])))
     data <- split(data, object[[clustering]])
 
     # inter-individual correlations

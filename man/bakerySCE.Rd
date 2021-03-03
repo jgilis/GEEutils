@@ -8,52 +8,53 @@ for SingleCellExperiment input}
 bakerySCE(object, id, corstr, extraSandwich = "none", family = "poisson")
 }
 \arguments{
-\item{object}{A `SingleCellExperiment` object}
+\item{object}{A \code{SingleCellExperiment} object}
 
-\item{id}{A `vector` which identifies the clusters. The length of id should
+\item{id}{A \code{vector} which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
 that observations on a cluster are contiguous rows for all entities in the
 formula.}
 
-\item{corstr}{A `character string` specifying the correlation structure.
+\item{corstr}{A \verb{character string} specifying the correlation structure.
 Default is "exchangeable". The following are permitted: "independence",
 "fixed", "stat_M_dep", "non_stat_M_dep", "exchangeable", "AR-M" and
 "unstructured".}
 
-\item{extraSandwich}{A `character vector` of sandwich estimation procedures
+\item{extraSandwich}{A \verb{character vector} of sandwich estimation procedures
 that must be used to compute robust standard errors, additional to the
 model standard error and the robust estimator from Liang and Zeger. The
-following are permitted: "none", "DF", "KC" and "Pan". If not specified or 
-set to "none", only the naive model standard error and the robust estimator 
+following are permitted: "none", "DF", "KC" and "Pan". If not specified or
+set to "none", only the naive model standard error and the robust estimator
 from Liang and Zeger will be provided.}
 
-\item{family}{A `character string` indicating the family for defining link
+\item{family}{A \verb{character string} indicating the family for defining link
 and variance functions. Currently, only "poisson" is supported.}
 }
 \value{
-An updated `SingleCellExperiment` object. The fitted GEE models for
-each gene can be retrieved from the `rowData` slot.
+An updated \code{SingleCellExperiment} object. The fitted GEE models for
+each gene can be retrieved from the \code{rowData} slot.
 }
 \description{
 Compute robust standard error estimates using multiple sandwich
-  strategies for SingleCellExperiment input
+strategies for SingleCellExperiment input
 }
 \examples{
+library(scuttle)
 set.seed(011235)
-sce <- scuttle::mockSCE(ncells = 400, ngenes = 10)
+sce <- mockSCE(ncells = 400, ngenes = 10)
 sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
 sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 
-MultiAssayExperiment::metadata(sce)$formula <- ~sce$group_id
+metadata(sce)$formula <- ~sce$group_id
 
 sce_fitted <- bakerySCE(object = sce,
                         id = "patient_id",
                         corstr = "independence",
                         extraSandwich = "none",
-                        family = "poisson") 
+                        family = "poisson")
 
 ## Model fit for gene "Gene_0001"
-SummarizedExperiment::rowData(sce_fitted)[["geefit"]]$Gene_0001
+rowData(sce_fitted)[["geefit"]]$Gene_0001
 
 }
 \author{
