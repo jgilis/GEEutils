@@ -33,31 +33,28 @@
     NA
 }
 
-#' Perform a Wald test on a glm with the possible of adopting robust standard
-#' errors
+#' GLM Wald tests
 #'
-#' @description Perform a Wald test on a glm with the possible of adopting
-#'   robust standard errors
+#' Perform Wald tests on GLM fits, optionally using robust standard errors.
 #'
-#' @param models A list of generalized linear models.
+#' @param models A list of generalized linear models,
+#'     fit using [`glm`][stats::glm].
 #'
-#' @param contrast A `matrix` specifying the contrast, i.e. combinations of
-#'   model parameters, of interest.
+#' @param contrast A `vector` specifying the contrast, i.e. combination of
+#'   model parameters of interest.
 #'
 #' @param sandwich A `logical` variable; should robust standard errors be
-#'   computed (sandwich procedure by Liang and Zeger). Default is TRUE.
+#'   computed (sandwich procedure by Liang and Zeger)?. Default is `TRUE`.
 #'
 #' @param adjust A `logical` variable; should a finite sample adjustment be
 #'   made? This amounts to multiplication with n/(n-k) where n is the number of
 #'   observations and k the number of estimated parameters.
 #'
-#' @return A `Dataframe` containing the requested model parameter estimates,
+#' @return A `data.frame` containing the requested model parameter estimates,
 #'   (robust) standard errors, degrees of freedom, Wald test statistics and
 #'   p-values.
 #'
-#' @rdname glmWaldTest
-#'
-#' @author Jeroen Gilis
+#' @author Jeroen Gilis, Milan Malfait
 #'
 #' @examples
 #' ## Simulate single gene across 10 patients in 2 groups

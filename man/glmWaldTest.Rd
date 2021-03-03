@@ -2,32 +2,31 @@
 % Please edit documentation in R/glmWaldTest.R
 \name{glmWaldTest}
 \alias{glmWaldTest}
-\title{Perform a Wald test on a glm with the possible of adopting robust standard
-errors}
+\title{GLM Wald tests}
 \usage{
 glmWaldTest(models, contrast, sandwich = TRUE, adjust = FALSE)
 }
 \arguments{
-\item{models}{A list of generalized linear models.}
+\item{models}{A list of generalized linear models,
+fit using \code{\link[stats:glm]{glm}}.}
 
-\item{contrast}{A \code{matrix} specifying the contrast, i.e. combinations of
-model parameters, of interest.}
+\item{contrast}{A \code{vector} specifying the contrast, i.e. combination of
+model parameters of interest.}
 
 \item{sandwich}{A \code{logical} variable; should robust standard errors be
-computed (sandwich procedure by Liang and Zeger). Default is TRUE.}
+computed (sandwich procedure by Liang and Zeger)?. Default is \code{TRUE}.}
 
 \item{adjust}{A \code{logical} variable; should a finite sample adjustment be
 made? This amounts to multiplication with n/(n-k) where n is the number of
 observations and k the number of estimated parameters.}
 }
 \value{
-A \code{Dataframe} containing the requested model parameter estimates,
+A \code{data.frame} containing the requested model parameter estimates,
 (robust) standard errors, degrees of freedom, Wald test statistics and
 p-values.
 }
 \description{
-Perform a Wald test on a glm with the possible of adopting
-robust standard errors
+Perform Wald tests on GLM fits, optionally using robust standard errors.
 }
 \examples{
 ## Simulate single gene across 10 patients in 2 groups
@@ -56,5 +55,5 @@ res <- glmWaldTest(
 
 }
 \author{
-Jeroen Gilis
+Jeroen Gilis, Milan Malfait
 }
