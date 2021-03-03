@@ -41,7 +41,7 @@
 #'   (robust) standard errors, degrees of freedom, Wald test statistics and
 #'   p-values.
 #'
-#' @rdname glm.Waldtest
+#' @rdname glmWaldTest
 #'
 #' @author Jeroen Gilis
 #'
@@ -68,13 +68,13 @@
 #' L["group_idgroup2",1] <- 1
 #' colnames(L) <- "group1_vs_group2"
 #'
-#' result <- gee.Waldtest(object=sce_fitted, contrast=L[,1], SE="robust.variance")
+#' result <- geeWaldTest(object=sce_fitted, contrast=L[,1], SE="robust.variance")
 #' ## result is a `data.frame` that contains the results of the Wald test for
 #' ##  the specified contrasts and working under the robust standard error by
 #' ## Liang and Zeger (1986).
 #'
 #' @export
-gee.Waldtest <- function(object, contrast, SE){
+geeWaldTest <- function(object, contrast, SE){
   # FIXME: replace `sapply` with `vapply`
   # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
   # TODO: convert 'models' to list internally? Makes using a single model

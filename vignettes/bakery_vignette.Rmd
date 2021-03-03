@@ -238,7 +238,7 @@ rownames(L) <- colnames(design)
 L["group_idtreat", 1] <- 1
 
 # no sandwich
-pois.res <- GEEutils::glm.Waldtest(
+pois.res <- GEEutils::glmWaldTest(
     models = list(pois.model),
     contrast = L[, 1],
     sandwich = FALSE,
@@ -247,7 +247,7 @@ pois.res <- GEEutils::glm.Waldtest(
 pois.res$se
 
 # LZ sandwich
-pois.res <- GEEutils::glm.Waldtest(
+pois.res <- GEEutils::glmWaldTest(
     models = list(pois.model),
     contrast = L[, 1],
     sandwich = TRUE,
@@ -256,7 +256,7 @@ pois.res <- GEEutils::glm.Waldtest(
 pois.res$se
 
 # LZ sandwich adjusted for small sample size
-pois.res <- GEEutils::glm.Waldtest(
+pois.res <- GEEutils::glmWaldTest(
     models = list(pois.model),
     contrast = L[, 1],
     sandwich = TRUE,
@@ -266,7 +266,7 @@ pois.res <- GEEutils::glm.Waldtest(
 pois.res$se
 ```
 
-Note that the `glm.Waldtest` function is flexible towards "multi-contrast" settings. I demonstrate this using new simulated data, mimicking a multi-patient multi-celltype setting.
+Note that the `glmWaldTest` function is flexible towards "multi-contrast" settings. I demonstrate this using new simulated data, mimicking a multi-patient multi-celltype setting.
 
 ```{r}
 set.seed(77)
@@ -302,7 +302,7 @@ L
 ```{r}
 # no sandwich
 pois.res <- lapply(seq_len(ncol(L)), function(i) {
-    GEEutils::glm.Waldtest(
+    GEEutils::glmWaldTest(
         models = list(pois.model),
         contrast = L[, i],
         sandwich = FALSE
@@ -312,7 +312,7 @@ unlist(pois.res)[c(2, 7, 12)]
 
 # LZ sandwich
 pois.res <- lapply(seq_len(ncol(L)), function(i) {
-    GEEutils::glm.Waldtest(
+    GEEutils::glmWaldTest(
         models = list(pois.model),
         contrast = L[, i],
         sandwich = TRUE,
@@ -323,7 +323,7 @@ unlist(pois.res)[c(2, 7, 12)]
 
 # LZ sandwich adjusted for small sample size
 pois.res <- lapply(seq_len(ncol(L)), function(i) {
-    GEEutils::glm.Waldtest(
+    GEEutils::glmWaldTest(
         models = list(pois.model),
         contrast = L[, i],
         sandwich = TRUE,
