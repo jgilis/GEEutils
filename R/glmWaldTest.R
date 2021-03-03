@@ -38,12 +38,6 @@
     NA
 }
 
-# Extract the degrees of freedom from a glm
-.glm_getDf <- function(model) {
-    model$df.residual
-}
-
-
 #' Perform a Wald test on a glm with the possible of adopting robust standard
 #' errors
 #'
@@ -97,19 +91,26 @@
 #'
 #' @export
 glmWaldTest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
-    # FIXME: replace `sapply` with `vapply`
-    # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
     if (is(models, "glm")) {
         ## If single model: make list internally
         models <- list(models)
     }
-    estimates <- sapply(models, .glm_getEstimates, contrast = contrast)
+    estimates <- vapply(models,
+        FUN = .glm_getEstimates, FUN.VALUE = numeric(1),
+        contrast = contrast
+    )
     if (sandwich) {
-        var <- sapply(models, .glm_sandwichVarContrast, contrast = contrast, adjust) # uses sandwich SEs
+        var <- vapply(models,
+            FUN = .glm_sandwichVarContrast, FUN.VALUE = numeric(1),
+            contrast = contrast, adjust
+        ) # uses sandwich SEs
     } else {
-        var <- sapply(models, .glm_varContrast, contrast = contrast) # uses GLM SEs
+        var <- vapply(models,
+            FUN = .glm_varContrast, FUN.VALUE = numeric(1),
+            contrast = contrast
+        ) # uses GLM SEs
     }
-    dfs <- sapply(models, .glm_getDf)
+    dfs <- vapply(models, FUN = `[[`, FUN.VALUE = numeric(1), "df.residual")
 
     se <- sqrt(var) # standard error
     W_stats <- estimates / se # Wald statistics
