@@ -41,8 +41,6 @@
 #'   (robust) standard errors, degrees of freedom, Wald test statistics and
 #'   p-values.
 #'
-#' @rdname glmWaldTest
-#'
 #' @author Jeroen Gilis
 #'
 #' @examples
