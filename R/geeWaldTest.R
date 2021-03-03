@@ -74,15 +74,16 @@
 #' ## Liang and Zeger (1986).
 #' @export
 geeWaldTest <- function(object, contrast, SE) {
-    # FIXME: replace `sapply` with `vapply`
-    # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
-    # TODO: convert 'models' to list internally? Makes using a single model
-    # bit more intuitive
-
     models <- rowData(object)[["geefit"]]
 
-    estimates <- sapply(models, .gee_getEstimates, contrast = contrast)
-    var <- sapply(models, .gee_varContrast, contrast = contrast, SE = SE)
+    estimates <- vapply(models,
+        FUN = .gee_getEstimates, FUN.VALUE = numeric(1),
+        contrast = contrast
+    )
+    var <- vapply(models,
+        FUN = .gee_varContrast, FUN.VALUE = numeric(1),
+        contrast = contrast, SE = SE
+    )
 
     se <- sqrt(var)
     W_stats <- estimates / se
