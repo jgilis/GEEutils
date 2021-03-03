@@ -1,11 +1,6 @@
-# Extract model coefficients from a glm
-.glm_getCoef <- function(model) {
-    model$coefficients
-}
-
 # Compute estimates for target contrast
 .glm_getEstimates <- function(model, contrast) {
-    coef <- .glm_getCoef(model)
+    coef <- model$coefficients
     if (is.null(coef)) {
         coef <- rep(NA, times = nrow(contrast))
     }
