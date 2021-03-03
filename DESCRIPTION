@@ -23,6 +23,9 @@ Imports:
     gdata,
     geesmv,
     sandwich,
+    dplyr,
+    data.table,
+    purrr,
     utils,
     methods,
     S4Vectors,
@@ -35,15 +38,14 @@ Suggests:
     BiocStyle,
     ExperimentHub,
     magrittr,
-    dplyr,
     SingleCellExperiment,
     geepack,
     geeM,
     scuttle
 VignetteBuilder: knitr
 Collate: 'getNoCor.R' 'runDimRed.R' 'getSimulationParameters.R' 'simulator.R'
-         'empirical_simulator.R' 'bakery.R' 'bakerySCE.R' 'glm.Waldtest.R'   
-         'gee.Waldtest.R' 'correlationsBoxplot.R'
+         'empirical_simulator.R' 'filterBySample.R' 'bakery.R' 'bakerySCE.R'    
+         'glm.Waldtest.R' 'gee.Waldtest.R' 'correlationsBoxplot.R'
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
 Encoding: UTF-8
