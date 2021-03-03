@@ -2,27 +2,28 @@
 % Please edit documentation in R/geeWaldTest.R
 \name{geeWaldTest}
 \alias{geeWaldTest}
-\title{Perform a Wald test on GEE models}
+\title{GEE Wald tests}
 \usage{
-geeWaldTest(object, contrast, SE)
+geeWaldTest(object, contrast, SE = "robust.variance")
 }
 \arguments{
-\item{object}{A \code{SingleCellExperiment} object that already contains fitted
-GEE models in the \code{rowData} slot of the object, as obtained with the GEEutils
-function \code{bakerySCE}.}
+\item{object}{A \code{SingleCellExperiment} object containing fitted
+GEE models in the \code{rowData} slot of the object, as obtained with
+\code{\link[=bakerySCE]{bakerySCE()}}}
 
-\item{contrast}{A \code{matrix} specifying the contrast, i.e. combinations of
-model parameters, of interest.}
+\item{contrast}{A \code{vector} specifying the contrast, i.e. combination of
+model parameters of interest.}
 
-\item{SE}{A \verb{character string} that indicates}
+\item{SE}{A \verb{character string} that indicates which variance estimator
+should be used for inference. Default: \code{"robust.variance"}.}
 }
 \value{
-A \code{Dataframe} containing the requested model parameter estimates,
+A \code{data.frame} containing the requested model parameter estimates,
 (robust) standard errors, degrees of freedom, Wald test statistics and
 p-values.
 }
 \description{
-Perform a Wald test on GEE models
+Perform Wald tests on fitted GEE models from \code{\link[=bakerySCE]{bakerySCE()}}.
 }
 \examples{
 library(scuttle)
@@ -54,6 +55,9 @@ result <- geeWaldTest(object = sce_fitted, contrast = L[, 1], SE = "robust.varia
 ##  the specified contrasts and working under the robust standard error by
 ## Liang and Zeger (1986).
 }
+\seealso{
+\code{\link[=bakerySCE]{bakerySCE()}}
+}
 \author{
-Jeroen Gilis
+Jeroen Gilis, Milan Malfait
 }

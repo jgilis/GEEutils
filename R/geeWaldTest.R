@@ -24,24 +24,26 @@
     }
 }
 
-#' Perform a Wald test on GEE models
+#' GEE Wald tests
 #'
-#' @description Perform a Wald test on GEE models
+#' Perform Wald tests on fitted GEE models from [`bakerySCE()`].
 #'
-#' @param object A `SingleCellExperiment` object that already contains fitted
-#' GEE models in the `rowData` slot of the object, as obtained with the GEEutils
-#' function `bakerySCE`.
+#' @param object A `SingleCellExperiment` object containing fitted
+#' GEE models in the `rowData` slot of the object, as obtained with
+#' [`bakerySCE()`]
 #'
-#' @param contrast A `matrix` specifying the contrast, i.e. combinations of
-#'   model parameters, of interest.
+#' @param contrast A `vector` specifying the contrast, i.e. combination of
+#'     model parameters of interest.
 #'
-#' @param SE A `character string` that indicates
+#' @param SE A `character string` that indicates which variance estimator
+#'     should be used for inference. Default: `"robust.variance"`.
 #'
-#' @return A `Dataframe` containing the requested model parameter estimates,
+#' @return A `data.frame` containing the requested model parameter estimates,
 #'   (robust) standard errors, degrees of freedom, Wald test statistics and
 #'   p-values.
 #'
-#' @author Jeroen Gilis
+#' @author Jeroen Gilis, Milan Malfait
+#' @seealso [bakerySCE()]
 #'
 #' @examples
 #' library(scuttle)
@@ -73,7 +75,7 @@
 #' ##  the specified contrasts and working under the robust standard error by
 #' ## Liang and Zeger (1986).
 #' @export
-geeWaldTest <- function(object, contrast, SE) {
+geeWaldTest <- function(object, contrast, SE = "robust.variance") {
     models <- rowData(object)[["geefit"]]
 
     estimates <- vapply(models,
