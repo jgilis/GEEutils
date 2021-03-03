@@ -125,6 +125,7 @@ filterBySample <- function(object,
     # remove genes if less than "size" samples have expression in 
     # a certain group
     remove <- c(names(which(rowSums(pb[[i]] > 0) <= size)), remove)
+    # NOTE: the >0 could also be >count, with count an input of filterBySample
   }
   
   return(object[-which(rownames(object) %in% unique(remove)),])

@@ -1,9 +1,11 @@
-# Calculate the modified GEE variance estimator proposed by Kauermann and Carroll (2001).
-# Code adapted from the `GEE.var.kc` function of the geesmv
+# Calculate the modified GEE variance estimator proposed by 
+# Kauermann and Carroll (2001). Code adapted from the `GEE.var.kc` function 
+# of the geesmv package
 #' @import geesmv
 .bakery_KC <- function(gee.fit, data, mat, corstr, family) {
 
-    # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
+    # TODO: if this part turns out to be identical for all extraSandwich, 
+    # consider moving it to a function .bakery_preprocess
     beta_est <- gee.fit$coefficients
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
@@ -77,6 +79,10 @@
     step13 <- matrix(0, nrow = len_vec, ncol = 1)
     step14 <- matrix(0, nrow = len_vec, ncol = len_vec)
     p <- matrix(0, nrow = len_vec, ncol = size)
+    
+    # TODO: Several computations of the loop below are the same as in loop above
+    #-> we can port the object from above to here. 
+    # I did this locally -> ±2x speed gain (at expense of memory)
     for (i in 1:size) {
         y <- as.matrix(data$response[data$id == unique(data$id)[i]])
         covariate <- as.matrix(subset(
@@ -92,6 +98,7 @@
                 cluster$n[i]
             ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
                 beta_est))), cluster$n[i])
+            
             ##### KC #####
             xy <- t(D) %*% solve(Vi) %*% mat.sqrt.inv(cormax.ind(cluster$n[i]) -
                 D %*% solve(step11) %*% t(D) %*% solve(Vi)) %*%
@@ -131,6 +138,7 @@
                 var_i %*% diag(sqrt(c(exp(covariate %*% beta_est)/
                                           (1 + exp(covariate %*% beta_est))^2)), 
                                cluster$n[i])
+            
             ##### KC #####
             xy <- t(D) %*% solve(Vi) %*% 
                 mat.sqrt.inv(cormax.ind(cluster$n[i]) - 
@@ -175,10 +183,13 @@
 
 
 # Calculate the modified GEE variance estimator proposed by Pan (2001).
+# Code adapted from the `GEE.var.pan` function of the geesmv package.
+# Note that, in this implementation, all clusters must be the same size.
 #' @import geesmv
 .bakery_Pan <- function(gee.fit, data, mat, corstr, family) {
 
-    # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
+    # TODO: if this part turns out to be identical for all extraSandwich, 
+    # consider moving it to a function .bakery_preprocess
     beta_est <- gee.fit$coefficients
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
@@ -263,7 +274,9 @@
                 sqrt(c(exp(covariate %*% beta_est))),
                 cluster$n[i]
             ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
-                beta_est))), cluster$n[i])
+                beta_est))), cluster$n[i]) 
+            #TODO computations for D and Vi are same in Pan as in KC
+            #-> if Pan is run after KC, we can speed up Pan
             
             xy <- t(D) %*% solve(Vi) %*% sqrt(A) %*% unstr %*%
                 sqrt(A) %*% solve(Vi) %*% D
