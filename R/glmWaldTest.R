@@ -50,8 +50,7 @@
 #' @description Perform a Wald test on a glm with the possible of adopting
 #'   robust standard errors
 #'
-#' @param models A list of generalized linear model. If a single model, make
-#'   sure to input it as a list by `list(glm)`.
+#' @param models A list of generalized linear models.
 #'
 #' @param contrast A `matrix` specifying the contrast, i.e. combinations of
 #'   model parameters, of interest.
@@ -100,8 +99,10 @@
 glmWaldTest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
     # FIXME: replace `sapply` with `vapply`
     # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
-    # TODO: convert 'models' to list internally? Makes using a single model
-    # bit more intuitive
+    if (is(models, "glm")) {
+        ## If single model: make list internally
+        models <- list(models)
+    }
     estimates <- sapply(models, .glm_getEstimates, contrast = contrast)
     if (sandwich) {
         var <- sapply(models, .glm_sandwichVarContrast, contrast = contrast, adjust) # uses sandwich SEs
@@ -109,7 +110,7 @@ glmWaldTest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
         var <- sapply(models, .glm_varContrast, contrast = contrast) # uses GLM SEs
     }
     dfs <- sapply(models, .glm_getDf)
-    
+
     se <- sqrt(var) # standard error
     W_stats <- estimates / se # Wald statistics
     pvals <- 2 * pt(abs(W_stats), df = dfs, lower.tail = FALSE)
