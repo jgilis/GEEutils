@@ -1,8 +1,11 @@
-# Calculate the modified GEE variance estimator proposed by Kauermann and Carroll (2001).
+# Calculate the modified GEE variance estimator proposed by 
+# Kauermann and Carroll (2001). Code adapted from the `GEE.var.kc` function 
+# of the geesmv package
 #' @import geesmv
-.bakery_KC <- function(gee.fit, data, mat, corstr) {
+.bakery_KC <- function(gee.fit, data, mat, corstr, family) {
 
-    # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
+    # TODO: if this part turns out to be identical for all extraSandwich, 
+    # consider moving it to a function .bakery_preprocess
     beta_est <- gee.fit$coefficients
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
@@ -23,7 +26,18 @@
         print(corstr)
         stop("'working correlation structure' not recognized")
     }
-    #####
+    if (is.character(family)) {
+        family <- switch(family, poisson = "poisson", binomial = "binomial")
+    }
+    else {
+        if (is.function(family)) {
+            family <- family()[[1]]
+        }
+        else {
+            stop("Family `", family, "` not recognized.", call. = FALSE)
+        }
+    }
+    ###############
 
     cov.beta <- matrix(0, nrow = len, ncol = len)
     step11 <- matrix(0, nrow = len, ncol = len)
@@ -34,19 +48,40 @@
             mat$subj == unique(data$id)[i]
         ))
         var_i <- var[1:cluster$n[i], 1:cluster$n[i]]
-        D <- mat.prod(covariate, exp(covariate %*% beta_est))
-        Vi <- diag(
-            sqrt(c(exp(covariate %*% beta_est))),
-            cluster$n[i]
-        ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
-            beta_est))), cluster$n[i])
-        xx <- t(D) %*% solve(Vi) %*% D
-        step11 <- step11 + xx
+        
+        if (family == "poisson") {
+            D <- mat.prod(covariate, exp(covariate %*% beta_est))
+            Vi <- diag(
+                sqrt(c(exp(covariate %*% beta_est))),
+                cluster$n[i]
+            ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
+                beta_est))), cluster$n[i])
+            xx <- t(D) %*% solve(Vi) %*% D
+            step11 <- step11 + xx
+        } 
+        else if (family == "binomial") {
+            D <- mat.prod(covariate,
+                          exp(covariate %*% beta_est)/
+                              ((1 + exp(covariate %*% beta_est))^2))
+            Vi <- diag(sqrt(c(exp(covariate %*% beta_est)/
+                                  (1 + exp(covariate %*% beta_est))^2)), 
+                       cluster$n[i]) %*% 
+                var_i %*% diag(sqrt(c(exp(covariate %*% beta_est)/
+                                          (1 +exp(covariate %*% beta_est))^2)), 
+                               cluster$n[i])
+            xx <- t(D) %*% solve(Vi) %*% D
+            step11 <- step11 + xx
+            
+        }
     }
     step12 <- matrix(0, nrow = len, ncol = len)
     step13 <- matrix(0, nrow = len_vec, ncol = 1)
     step14 <- matrix(0, nrow = len_vec, ncol = len_vec)
     p <- matrix(0, nrow = len_vec, ncol = size)
+    
+    # TODO: Several computations of the loop below are the same as in loop above
+    #-> we can port the object from above to here. 
+    # I did this locally -> ±2x speed gain (at expense of memory)
     for (i in 1:size) {
         y <- as.matrix(data$response[data$id == unique(data$id)[i]])
         covariate <- as.matrix(subset(
@@ -54,34 +89,85 @@
             mat$subj == unique(data$id)[i]
         ))
         var_i <- var[1:cluster$n[i], 1:cluster$n[i]]
-        D <- mat.prod(covariate, exp(covariate %*% beta_est))
-        Vi <- diag(
-            sqrt(c(exp(covariate %*% beta_est))),
-            cluster$n[i]
-        ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
-            beta_est))), cluster$n[i])
-        ##### KC #####
-        xy <- t(D) %*% solve(Vi) %*% mat.sqrt.inv(cormax.ind(cluster$n[i]) -
-            D %*% solve(step11) %*% t(D) %*% solve(Vi)) %*%
-            (y - exp(covariate %*% beta_est))
-        ##############
         
-        # check and handle complex numbers from eigenvalues
-        if(any(is.complex(xy))){
-            message(paste0("Subject ", i, ": Complex numbers detected"))
-            xy <- zapsmall(xy)
-            if (all(Im(xy)==0)){
-                xy <- as.numeric(xy)
-                message(paste0("Subject ", i, ": All complex +0i, set to numeric"))
-            } else {
-                message(paste0("Subject ", i, ": At least some complex not +0i"))
+        if (family == "poisson") {
+            D <- mat.prod(covariate, exp(covariate %*% beta_est))
+            Vi <- diag(
+                sqrt(c(exp(covariate %*% beta_est))),
+                cluster$n[i]
+            ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
+                beta_est))), cluster$n[i])
+            
+            ##### KC #####
+            xy <- t(D) %*% solve(Vi) %*% mat.sqrt.inv(cormax.ind(cluster$n[i]) -
+                D %*% solve(step11) %*% t(D) %*% solve(Vi)) %*%
+                (y - exp(covariate %*% beta_est))
+            ##############
+            
+            # check and handle complex numbers from eigenvalues
+            if(any(is.complex(xy))){
+                message(paste0("Subject ", 
+                               i, 
+                               ": Complex numbers detected"))
+                xy <- zapsmall(xy)
+                if (all(Im(xy)==0)){
+                    xy <- as.numeric(xy)
+                    message(paste0("Subject ", 
+                                   i, 
+                                   ": All complex +0i, set to numeric"))
+                } else {
+                    message(paste0("Subject ", 
+                                   i, 
+                                   ": At least some complex not +0i"))
+                }
             }
+            
+            step12 <- step12 + xy %*% t(xy)
+            # TODO: could change matrixcalc::vec to c
+            step13 <- step13 + matrixcalc::vec(xy %*% t(xy))
+            p[, i] <- matrixcalc::vec(xy %*% t(xy))
         }
-        
-        step12 <- step12 + xy %*% t(xy)
-        # TODO: could change matrixcalc::vec to c
-        step13 <- step13 + matrixcalc::vec(xy %*% t(xy))
-        p[, i] <- matrixcalc::vec(xy %*% t(xy))
+        else if  (family == "binomial") {
+            D <- mat.prod(covariate, 
+                          exp(covariate %*% beta_est)/
+                              ((1 + exp(covariate %*% beta_est))^2))
+            Vi <- diag(sqrt(c(exp(covariate %*% beta_est)/
+                                  (1 + exp(covariate %*% beta_est))^2)), 
+                       cluster$n[i]) %*% 
+                var_i %*% diag(sqrt(c(exp(covariate %*% beta_est)/
+                                          (1 + exp(covariate %*% beta_est))^2)), 
+                               cluster$n[i])
+            
+            ##### KC #####
+            xy <- t(D) %*% solve(Vi) %*% 
+                mat.sqrt.inv(cormax.ind(cluster$n[i]) - 
+                                 D %*% solve(step11) 
+                             %*% t(D) %*% 
+                                 solve(Vi)) %*% 
+                (y - exp(covariate %*% beta_est)/
+                     (1 + exp(covariate %*% beta_est)))
+            ##############
+            
+            # check and handle complex numbers from eigenvalues
+            if(any(is.complex(xy))){
+                message(paste0("Subject ", i, ": Complex numbers detected"))
+                xy <- zapsmall(xy)
+                if (all(Im(xy)==0)){
+                    xy <- as.numeric(xy)
+                    message(paste0("Subject ", 
+                                   i, 
+                                   ": All complex +0i, set to numeric"))
+                } else {
+                    message(paste0("Subject ", 
+                                   i, 
+                                   ": At least some complex not +0i"))
+                }
+            }
+            
+            step12 <- step12 + xy %*% t(xy)
+            step13 <- step13 + vec(xy %*% t(xy))
+            p[, i] <- vec(xy %*% t(xy))
+        }
     }
     for (i in 1:size) {
         dif <- (p[, i] - step13 / size) %*% t(p[, i] - step13 / size)
@@ -96,10 +182,13 @@
 
 
 # Calculate the modified GEE variance estimator proposed by Pan (2001).
+# Code adapted from the `GEE.var.pan` function of the geesmv package.
+# Note that, in this implementation, all clusters must be the same size.
 #' @import geesmv
-.bakery_Pan <- function(gee.fit, data, mat, corstr) {
+.bakery_Pan <- function(gee.fit, data, mat, corstr, family) {
 
-    # TODO: if this part turns out to be identical for all extraSandwich, consider moving it to a function .bakery_preprocess
+    # TODO: if this part turns out to be identical for all extraSandwich, 
+    # consider moving it to a function .bakery_preprocess
     beta_est <- gee.fit$coefficients
     alpha <- gee.fit$working.correlation[1, 2]
     len <- length(beta_est)
@@ -120,7 +209,18 @@
         print(corstr)
         stop("'working correlation structure' not recognized")
     }
-    #####
+    if (is.character(family)) {
+        family <- switch(family, poisson = "poisson", binomial = "binomial")
+    }
+    else {
+        if (is.function(family)) {
+            family <- family()[[1]]
+        }
+        else {
+            stop("Family `", family, "` not recognized.", call. = FALSE)
+        }
+    }
+    ###############
 
     cov.beta <- matrix(0, nrow = len, ncol = len)
     step <- matrix(0, nrow = cluster$n[1], ncol = cluster$n[1])
@@ -130,11 +230,24 @@
             mat[, -length(mat[1, ])],
             mat$subj == unique(data$id)[i]
         ))
-        resid <- (y - exp(covariate %*% beta_est)) %*% t(y -
-            exp(covariate %*% beta_est))
-        B <- matrix(0, nrow = cluster$n[i], ncol = cluster$n[i])
-        diag(B) <- 1 / sqrt(exp(covariate %*% beta_est))
-        step <- step + B %*% resid %*% B
+        
+        if (family == "poisson") {
+            resid <- (y - exp(covariate %*% beta_est)) %*% t(y -
+                exp(covariate %*% beta_est))
+            B <- matrix(0, nrow = cluster$n[i], ncol = cluster$n[i])
+            diag(B) <- 1 / sqrt(exp(covariate %*% beta_est))
+            step <- step + B %*% resid %*% B
+        }
+        else if (family == "binomial") {
+            resid <- (y - exp(covariate %*% beta_est)/
+                          (1 + exp(covariate %*% beta_est))) %*% 
+                t(y - exp(covariate %*% beta_est)/
+                      (1 + exp(covariate %*% beta_est)))
+            B <- matrix(0, nrow = cluster$n[i], ncol = cluster$n[i])
+            diag(B) <- 1/sqrt(exp(covariate %*% beta_est)/
+                                  (1 + exp(covariate %*% beta_est))^2)
+            step <- step + B %*% resid %*% B
+        }
     }
     unstr <- step / size
     step11 <- matrix(0, nrow = len, ncol = len)
@@ -150,22 +263,53 @@
             mat$subj == unique(data$id)[i]
         ))
         var_i <- var[1:cluster$n[i], 1:cluster$n[i]]
-
-        A <- matrix(0, nrow = cluster$n[i], ncol = cluster$n[i])
-        diag(A) <- exp(covariate %*% beta_est)
-        D <- mat.prod(covariate, exp(covariate %*% beta_est))
-        Vi <- diag(
-            sqrt(c(exp(covariate %*% beta_est))),
-            cluster$n[i]
-        ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
-            beta_est))), cluster$n[i])
-        xy <- t(D) %*% solve(Vi) %*% sqrt(A) %*% unstr %*%
-            sqrt(A) %*% solve(Vi) %*% D
-        xx <- t(D) %*% solve(Vi) %*% D
-        step12 <- step12 + xy
-        step11 <- step11 + xx
-        step13 <- step13 + matrixcalc::vec(xy)
-        p[, i] <- matrixcalc::vec(xy)
+        
+        if (family == "poisson") {
+            A <- matrix(0, nrow = cluster$n[i], ncol = cluster$n[i])
+            diag(A) <- exp(covariate %*% beta_est)
+            D <- mat.prod(covariate, exp(covariate %*% beta_est))
+            Vi <- diag(
+                sqrt(c(exp(covariate %*% beta_est))),
+                cluster$n[i]
+            ) %*% var_i %*% diag(sqrt(c(exp(covariate %*%
+                beta_est))), cluster$n[i]) 
+            #TODO computations for D and Vi are same in Pan as in KC
+            #-> if Pan is run after KC, we can speed up Pan
+            
+            xy <- t(D) %*% solve(Vi) %*% sqrt(A) %*% unstr %*%
+                sqrt(A) %*% solve(Vi) %*% D
+            
+            xx <- t(D) %*% solve(Vi) %*% D
+            
+            step12 <- step12 + xy
+            step11 <- step11 + xx
+            step13 <- step13 + matrixcalc::vec(xy)
+            p[, i] <- matrixcalc::vec(xy)
+        }
+        else if (family == "binomial") {
+            A <- matrix(0, nrow = cluster$n[i], ncol = cluster$n[i])
+            diag(A) <- exp(covariate %*% beta_est)/
+                (1 + exp(covariate %*%  beta_est))^2
+            D <- mat.prod(covariate, 
+                          exp(covariate %*% beta_est)/
+                              ((1 + exp(covariate %*% beta_est))^2))
+            Vi <- diag(sqrt(c(exp(covariate %*% beta_est)/
+                                  (1 + exp(covariate %*% beta_est))^2)), 
+                       cluster$n[i]) %*% var_i %*% 
+                diag(sqrt(c(exp(covariate %*% beta_est)/
+                                (1 + exp(covariate %*% beta_est))^2)), 
+                     cluster$n[i])
+            
+            xy <- t(D) %*% solve(Vi) %*% sqrt(A) %*% unstr %*% 
+                sqrt(A) %*% solve(Vi) %*% D
+            
+            xx <- t(D) %*% solve(Vi) %*% D
+            
+            step12 <- step12 + xy
+            step11 <- step11 + xx
+            step13 <- step13 + vec(xy)
+            p[, i] <- vec(xy)
+        }
     }
 
     for (i in 1:size) {
@@ -251,7 +395,8 @@
 #'
 #' @export
 bakery <- function(formula,
-                   id, data,
+                   id, 
+                   data,
                    family,
                    corstr,
                    extraSandwich = "none") {
@@ -293,11 +438,11 @@ bakery <- function(formula,
     }
 
     if ("KC" %in% extraSandwich) {
-        gee.fit$KC.variance <- .bakery_KC(gee.fit, data, mat, corstr)
+        gee.fit$KC.variance <- .bakery_KC(gee.fit, data, mat, corstr, family)
     }
 
     if ("Pan" %in% extraSandwich) {
-        gee.fit$Pan.variance <- .bakery_Pan(gee.fit, data, mat, corstr)
+        gee.fit$Pan.variance <- .bakery_Pan(gee.fit, data, mat, corstr, family)
     }
     # only return what will be used later
     gee.fit <- gee.fit[grepl("variance|coefficients", names(gee.fit))]

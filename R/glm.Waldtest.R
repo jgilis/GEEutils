@@ -18,7 +18,7 @@
     if (!any(is(model, "fitError"))) {
         sx <- summary(model) # maybe I can also only compute vcov to gain speed
         if (nrow(sx$cov.scaled) == length(contrast)) {
-            return(sqrt(diag(t(contrast) %*% sx$cov.scaled %*% contrast))) # scaled by dispersion
+            return(diag(t(contrast) %*% sx$cov.scaled %*% contrast)) # scaled by dispersion
         }
     }
     NA
