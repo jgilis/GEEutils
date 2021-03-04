@@ -34,8 +34,7 @@
             family <- family()[[1]]
         }
         else {
-            print(family)
-            stop("'family' not recognized")
+            stop("Family `", family, "` not recognized.", call. = FALSE)
         }
     }
     ###############
@@ -218,8 +217,7 @@
             family <- family()[[1]]
         }
         else {
-            print(family)
-            stop("'family' not recognized")
+            stop("Family `", family, "` not recognized.", call. = FALSE)
         }
     }
     ###############

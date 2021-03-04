@@ -1,4 +1,5 @@
 # Adapted from Muscat
+# See: https://github.com/HelenaLC/muscat/, utils.R 
 # ------------------------------------------------------------------------------
 # split cells by group-sample
 # ------------------------------------------------------------------------------
@@ -7,23 +8,24 @@
 # ------------------------------------------------------------------------------
 #' @importFrom SummarizedExperiment colData
 #' @importFrom data.table data.table
-#' @importFrom dplyr %>%
 #' @importFrom purrr map_depth
 .split_cells_filter <- function (x, by)
 {
   if (is(x, "SingleCellExperiment"))
     x <- colData(x)
   cd <- data.frame(x[by], check.names = FALSE)
-  cd <- data.table(cd, cell = rownames(x)) %>% 
-    split(by = by, 
-          sorted = TRUE, 
-          flatten = FALSE, 
-          drop = TRUE) 
+  cd <- data.table(cd, cell = rownames(x))
+  cd <- split(cd,
+              by = by, 
+              sorted = TRUE, 
+              flatten = FALSE, 
+              drop = TRUE) 
   # added drop=TRUE in split to remove empty group*sample combinations
   map_depth(cd, length(by), "cell")
 }
 
 # Adapted from Muscat
+# See: https://github.com/HelenaLC/muscat/, utils-pbDS.R 
 # ------------------------------------------------------------------------------
 # Aggregate cells that originate from the same group-sample combination
 # ------------------------------------------------------------------------------
