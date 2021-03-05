@@ -5,10 +5,21 @@
 \title{Compute robust standard error estimates using multiple sandwich strategies
 for SingleCellExperiment input}
 \usage{
-bakerySCE(object, id, corstr, extraSandwich = "none", family = "poisson")
+bakerySCE(
+  object,
+  formula,
+  id,
+  corstr,
+  extraSandwich = "none",
+  family = "poisson"
+)
 }
 \arguments{
 \item{object}{A \code{SingleCellExperiment} object}
+
+\item{formula}{A formula expression as for other regression models,
+of the form response ~ predictors. See the documentation of lm and formula
+for details.}
 
 \item{id}{A \code{vector} which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
@@ -45,9 +56,8 @@ sce <- mockSCE(ncells = 400, ngenes = 10)
 sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
 sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 
-metadata(sce)$formula <- ~sce$group_id
-
 sce_fitted <- bakerySCE(object = sce,
+                        formula = ~ group_id, 
                         id = "patient_id",
                         corstr = "independence",
                         extraSandwich = "none",

@@ -4,9 +4,12 @@
 \alias{bakery}
 \title{Compute robust standard error estimates using multiple sandwich strategies}
 \usage{
-bakery(formula, id, data, family, corstr, extraSandwich = "none")
+bakery(response, formula, id, data, family, corstr, extraSandwich = "none")
 }
 \arguments{
+\item{response}{A \code{numeric} response vector. In the context of single-cell
+transcriptomics, it is the expression vector of a single gene.}
+
 \item{formula}{A formula expression as for other regression models, of the
 form response ~ predictors. See the documentation of \code{lm} and \code{formula} for
 details.}
@@ -51,7 +54,8 @@ data <- data.frame(gene, group_id, patient_id)
 
 ## Run bakery with KC and Pan extra sandwiches
 out <- bakery(
-    formula = gene ~ group_id,
+    response = gene,
+    formula = ~ group_id,
     id = "patient_id",
     data = data,
     family = "poisson",

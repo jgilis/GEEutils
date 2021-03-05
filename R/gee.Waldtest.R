@@ -41,7 +41,7 @@
 #'   (robust) standard errors, degrees of freedom, Wald test statistics and
 #'   p-values.
 #'
-#' @rdname glm.Waldtest
+#' @rdname gee.Waldtest
 #'
 #' @author Jeroen Gilis
 #'
@@ -52,10 +52,8 @@
 #' sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
 #' sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 #'
-#' metadata(sce)$formula <- ~sce$group_id
-#'
-#' ## Fit models with bakerySCE
 #' sce_fitted <- bakerySCE(object = sce,
+#'                         formula = ~ group_id, 
 #'                         id = "patient_id",
 #'                         corstr = "independence",
 #'                         extraSandwich = "none",
