@@ -1,11 +1,6 @@
-# Extract model coefficients from a glm
-.glm_getCoef <- function(model) {
-    model$coefficients
-}
-
 # Compute estimates for target contrast
 .glm_getEstimates <- function(model, contrast) {
-    coef <- .glm_getCoef(model)
+    coef <- model$coefficients
     if (is.null(coef)) {
         coef <- rep(NA, times = nrow(contrast))
     }
@@ -38,38 +33,28 @@
     NA
 }
 
-# Extract the degrees of freedom from a glm
-.glm_getDf <- function(model) {
-    model$df.residual
-}
-
-
-#' Perform a Wald test on a glm with the possible of adopting robust standard
-#' errors
+#' GLM Wald tests
 #'
-#' @description Perform a Wald test on a glm with the possible of adopting
-#'   robust standard errors
+#' Perform Wald tests on GLM fits, optionally using robust standard errors.
 #'
-#' @param models A list of generalized linear model. If a single model, make
-#'   sure to input it as a list by `list(glm)`.
+#' @param models A list of generalized linear models,
+#'     fit using [`glm`][stats::glm].
 #'
-#' @param contrast A `matrix` specifying the contrast, i.e. combinations of
-#'   model parameters, of interest.
+#' @param contrast A `vector` specifying the contrast, i.e. combination of
+#'   model parameters of interest.
 #'
 #' @param sandwich A `logical` variable; should robust standard errors be
-#'   computed (sandwich procedure by Liang and Zeger). Default is TRUE.
+#'   computed (sandwich procedure by Liang and Zeger)?. Default is `TRUE`.
 #'
 #' @param adjust A `logical` variable; should a finite sample adjustment be
 #'   made? This amounts to multiplication with n/(n-k) where n is the number of
 #'   observations and k the number of estimated parameters.
 #'
-#' @return A `Dataframe` containing the requested model parameter estimates,
+#' @return A `data.frame` containing the requested model parameter estimates,
 #'   (robust) standard errors, degrees of freedom, Wald test statistics and
 #'   p-values.
 #'
-#' @rdname glm.Waldtest
-#'
-#' @author Jeroen Gilis
+#' @author Jeroen Gilis, Milan Malfait
 #'
 #' @examples
 #' ## Simulate single gene across 10 patients in 2 groups
@@ -89,7 +74,7 @@
 #' pois_model <- glm(gene ~ group_id, family = poisson, data = data)
 #'
 #' ## Wald test with sandwich estimator and small sample-size adjustment
-#' res <- glm.Waldtest(
+#' res <- glmWaldTest(
 #'     models = list(pois_model),
 #'     contrast = L[, 1],
 #'     sandwich = TRUE,
@@ -97,19 +82,28 @@
 #' )
 #'
 #' @export
-glm.Waldtest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
-    # FIXME: replace `sapply` with `vapply`
-    # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
-    # TODO: convert 'models' to list internally? Makes using a single model
-    # bit more intuitive
-    estimates <- sapply(models, .glm_getEstimates, contrast = contrast)
-    if (sandwich) {
-        var <- sapply(models, .glm_sandwichVarContrast, contrast = contrast, adjust) # uses sandwich SEs
-    } else {
-        var <- sapply(models, .glm_varContrast, contrast = contrast) # uses GLM SEs
+glmWaldTest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
+    if (is(models, "glm")) {
+        ## If single model: make list internally
+        models <- list(models)
     }
-    dfs <- sapply(models, .glm_getDf)
-    
+    estimates <- vapply(models,
+        FUN = .glm_getEstimates, FUN.VALUE = numeric(1),
+        contrast = contrast
+    )
+    if (sandwich) {
+        var <- vapply(models,
+            FUN = .glm_sandwichVarContrast, FUN.VALUE = numeric(1),
+            contrast = contrast, adjust
+        ) # uses sandwich SEs
+    } else {
+        var <- vapply(models,
+            FUN = .glm_varContrast, FUN.VALUE = numeric(1),
+            contrast = contrast
+        ) # uses GLM SEs
+    }
+    dfs <- vapply(models, FUN = `[[`, FUN.VALUE = numeric(1), "df.residual")
+
     se <- sqrt(var) # standard error
     W_stats <- estimates / se # Wald statistics
     pvals <- 2 * pt(abs(W_stats), df = dfs, lower.tail = FALSE)
