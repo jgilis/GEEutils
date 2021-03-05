@@ -8,7 +8,9 @@
 #' 
 #' @param formula A formula expression as for other regression models,
 #' of the form response ~ predictors. See the documentation of lm and formula 
-#' for details.
+#' for details. It is possible to provide offsets to the model by including
+#' offset(my_offsets) to the model, where my_offsets must be in the `colData`
+#' of the object.
 #'
 #' @param id A `vector` which identifies the clusters. The length of id should
 #'   be the same as the number of observations. Data are assumed to be sorted so
@@ -28,7 +30,8 @@
 #'   from Liang and Zeger will be provided.
 #'
 #' @param family A `character string` indicating the family for defining link
-#'   and variance functions. Currently, only "poisson" is supported.
+#'   and variance functions. Currently, only "poisson" and binomial are 
+#'   supported.
 #'
 #' @return An updated `SingleCellExperiment` object. The fitted GEE models for
 #' each gene can be retrieved from the `rowData` slot.

@@ -19,7 +19,9 @@ bakerySCE(
 
 \item{formula}{A formula expression as for other regression models,
 of the form response ~ predictors. See the documentation of lm and formula
-for details.}
+for details. It is possible to provide offsets to the model by including
+offset(my_offsets) to the model, where my_offsets must be in the \code{colData}
+of the object.}
 
 \item{id}{A \code{vector} which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
@@ -39,7 +41,8 @@ set to "none", only the naive model standard error and the robust estimator
 from Liang and Zeger will be provided.}
 
 \item{family}{A \verb{character string} indicating the family for defining link
-and variance functions. Currently, only "poisson" is supported.}
+and variance functions. Currently, only "poisson" and binomial are
+supported.}
 }
 \value{
 An updated \code{SingleCellExperiment} object. The fitted GEE models for

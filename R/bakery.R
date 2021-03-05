@@ -325,7 +325,9 @@
 #'
 #' @param formula A formula expression as for other regression models, of the
 #'   form response ~ predictors. See the documentation of `lm` and `formula` for
-#'   details.
+#'   details. It is possible to provide offsets to the model by including 
+#'   offset(my_offsets) to the model, with my_offsets a vector of precomputed
+#'   offsets. 
 #'
 #' @param id A `vector` which identifies the clusters. The length of id should
 #'   be the same as the number of observations. Data are assumed to be sorted so
@@ -336,7 +338,8 @@
 #'   occurring in the formula, along with the id and n variables.
 #'
 #' @param family A `character string` indicating the family for defining link
-#'   and variance functions. Currently, only "poisson" is supported.
+#'   and variance functions. Currently, only "poisson" and "binomial are 
+#'   supported.
 #'
 #' @param corstr A `character string` specifying the correlation structure.
 #'   Default is "exchangeable". The following are permitted: "independence",

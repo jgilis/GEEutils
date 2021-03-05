@@ -67,7 +67,7 @@
 #'   (robust) standard errors, degrees of freedom, Wald test statistics and
 #'   p-values.
 #'
-#' @rdname glm.Waldtest
+#' @rdname glmWaldtest
 #'
 #' @author Jeroen Gilis
 #'
@@ -89,7 +89,7 @@
 #' pois_model <- glm(gene ~ group_id, family = poisson, data = data)
 #'
 #' ## Wald test with sandwich estimator and small sample-size adjustment
-#' res <- glm.Waldtest(
+#' res <- glmWaldtest(
 #'     models = list(pois_model),
 #'     contrast = L[, 1],
 #'     sandwich = TRUE,
@@ -97,7 +97,7 @@
 #' )
 #'
 #' @export
-glm.Waldtest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
+glmWaldtest <- function(models, contrast, sandwich = TRUE, adjust = FALSE) {
     # FIXME: replace `sapply` with `vapply`
     # cfr. https://bioconductor.org/developers/package-guidelines/#rcode
     # TODO: convert 'models' to list internally? Makes using a single model
