@@ -43,9 +43,6 @@ Suggests:
     geeM,
     scuttle
 VignetteBuilder: knitr
-Collate: 'getNoCor.R' 'runDimRed.R' 'getSimulationParameters.R' 'simulator.R'
-         'empirical_simulator.R' 'bakery.R' 'bakerySCE.R' 'glmWaldTest.R'
-         'geeWaldTest.R' 'correlationsBoxplot.R'
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
 Encoding: UTF-8
