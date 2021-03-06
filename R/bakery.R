@@ -2,7 +2,7 @@
 # Kauermann and Carroll (2001). Code adapted from the `GEE.var.kc` function 
 # of the geesmv package
 #' @import geesmv
-.bakery_KC <- function(gee.fit, data, mat, offset, corstr, family) {
+.bakery_KC <- function(gee.fit, data, mat, corstr, family) {
 
     # TODO: if this part turns out to be identical for all extraSandwich, 
     # consider moving it to a function .bakery_preprocess
@@ -50,7 +50,7 @@
                                       mat$subj == unique(data$id)[i]))
         var_i <- var[1:cluster$n[i], 1:cluster$n[i]]
         
-        off <- offset[mat$subj == unique(data$id)[i]]
+        off <- data$offset[mat$subj == unique(data$id)[i]]
         eta <- covariate %*% beta_est + off # add offsets (0 if not provided)
         
         if (family == "poisson") {
@@ -91,7 +91,7 @@
                                       mat$subj == unique(data$id)[i]))
         var_i <- var[1:cluster$n[i], 1:cluster$n[i]]
         
-        off <- offset[mat$subj == unique(data$id)[i]]
+        off <- data$offset[mat$subj == unique(data$id)[i]]
         eta <- covariate %*% beta_est + off # add offsets (0 if not provided)
         
         if (family == "poisson") {
@@ -177,7 +177,7 @@
 # Code adapted from the `GEE.var.pan` function of the geesmv package.
 # Note that, in this implementation, all clusters must be the same size.
 #' @import geesmv
-.bakery_Pan <- function(gee.fit, data, mat, offset, corstr, family) {
+.bakery_Pan <- function(gee.fit, data, mat, corstr, family) {
 
     # TODO: if this part turns out to be identical for all extraSandwich, 
     # consider moving it to a function .bakery_preprocess
@@ -224,7 +224,7 @@
             mat[, -length(mat[1, ])], 
             mat$subj == unique(data$id)[i]))
         
-        off <- offset[mat$subj == unique(data$id)[i]]
+        off <- data$offset[mat$subj == unique(data$id)[i]]
         eta <- covariate %*% beta_est + off # add offsets (0 if not provided)
         
         if (family == "poisson") {
@@ -259,7 +259,7 @@
                                       mat$subj == unique(data$id)[i]))
         var_i <- var[1:cluster$n[i], 1:cluster$n[i]]
         
-        off <- offset[mat$subj == unique(data$id)[i]]
+        off <- data$offset[mat$subj == unique(data$id)[i]]
         eta <- covariate %*% beta_est + off # add offsets (0 if not provided)
         
         if (family == "poisson") {
@@ -420,16 +420,16 @@ bakery <- function(response,
     nn <- dim(data)[1]
     off <- model.offset(m)
     if (is.null(off)) {
-        offset <- rep(0, nn) 
+        data$offset <- rep(0, nn) 
         #if NULL, do not use offsets (set all to zero)
         #TODO alternatively, we could enforce a certain default offset
     } else {
-        offset <- off
+        data$offset <- off
     }
     
     design <- model.matrix(formula, data = data)
     
-    gee.fit <- gee(formula = response ~ -1 + design + offset(offset),
+    gee.fit <- gee(formula = response ~ -1 + design + offset(data$offset),
         data = data,
         id = id,
         family = family,
@@ -451,7 +451,6 @@ bakery <- function(response,
         gee.fit$KC.variance <- .bakery_KC(gee.fit,
                                         data,
                                         mat,
-                                        offset,
                                         corstr,
                                         family)
     }
@@ -460,7 +459,6 @@ bakery <- function(response,
         gee.fit$Pan.variance <- .bakery_Pan(gee.fit,
                                             data,
                                             mat,
-                                            offset,
                                             corstr,
                                             family)
     }
