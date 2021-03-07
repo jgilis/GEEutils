@@ -73,7 +73,7 @@ bakerySCE <- function(object,
   data <- as.data.frame(colData(object))
 
   geefit <- lapply(1:nrow(counts), function(i) {
-      geefit_i <- suppressMessages(bakery(
+      geefit_i <- try(suppressMessages(bakery(
           response = counts[i,],
           formula = formula,
           id = id,
@@ -81,7 +81,7 @@ bakerySCE <- function(object,
           family = family,
           corstr = corstr,
           extraSandwich = extraSandwich
-      ))
+      )))
   })
   names(geefit) <- rownames(counts)
 
