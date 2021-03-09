@@ -12,7 +12,7 @@ Authors@R: c(
     )
 Description: Aggregation of utility functions for working with Generalized Estimation Equations.
 Depends: R (>= 4.0)
-Imports: 
+Imports:
     scater,
     ggplot2,
     fitdistrplus,
@@ -42,9 +42,6 @@ Suggests:
     geeM,
     scuttle
 VignetteBuilder: knitr
-Collate: 'getNoCor.R' 'runDimRed.R' 'getSimulationParameters.R' 'simulator.R'
-         'empirical_simulator.R' 'filterBySample.R' 'bakery.R' 'bakerySCE.R'    
-         'glmWaldtest.R' 'geeWaldtest.R' 'correlationsBoxplot.R'
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
 Encoding: UTF-8

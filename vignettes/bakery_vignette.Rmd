@@ -28,7 +28,7 @@ sandwich estimation procedures:
 - The sandwich estimator of [Pan](https://doi.org/10.1093/biomet/88.3.901) (Pan)
 
 These estimators, along with several others, have already been implemented
-in R in the package 
+in R in the package
 [geesmv](https://cran.r-project.org/web/packages/geesmv/index.html).
 However, the different sandwich estimation procedures from `geesmv` requires
 refitting the GEE model, which, at least for the `KC` and `Pan` estimators,
@@ -67,7 +67,7 @@ set.seed(77)
 gene1 <- rpois(500, 3)
 group_id <- rep(c("control", "treat"), each = 250)
 patient_id <- rep(paste0("patient", 1:10), each = 50)
-# patient_id <- rep(paste0("patient", 1:10), 
+# patient_id <- rep(paste0("patient", 1:10),
 #                   times = c(30,40,50,60,70,70,60,50,40,30))
 #when the number of cells differs across patients, geesmv::GEE.var.pan breaks
 
@@ -84,7 +84,7 @@ data <- data[order(data$patient_id),] # sort on "id"
 head(data$patient_id)
 ```
 
-# Fit GEE 
+# Fit GEE
 
 ## GEE with GEEpack
 
@@ -114,7 +114,7 @@ m2 <- gee(
 )
 
 m2$coefficients # estimates
-sqrt(diag(m2$naive.variance)) 
+sqrt(diag(m2$naive.variance))
 # SE --> different from geese, but same as geeM with default useP
 
 sqrt(diag(m2$robust.variance)) # sandwich SE --> same
@@ -161,7 +161,7 @@ sqrt(diag(m3$var)) # sandwich SE --> same
 
 # Compute sandwich using geesmv
 
-Note; geesmv uses the gee package for fitting the GEE model with 
+Note; geesmv uses the gee package for fitting the GEE model with
 the sandwich estimator of Liang and Zeger as a default.
 
 ## Liang and Zeger (LZ)
@@ -189,7 +189,7 @@ pan.exch <- GEE.var.pan(
     corstr = "exchangeable"
 ) ## Exchangeable correlation structure;
 
-sqrt(pan.exch$cov.beta) # different SE --> same as model SE?? 
+sqrt(pan.exch$cov.beta) # different SE --> same as model SE??
 # --> probably because Exch + all clusters same size
 ```
 
@@ -209,16 +209,16 @@ sqrt(kc.exch$cov.beta) # different SE
 
 # bakery
 
-Since I would be very much interested in porting the work from 
-[Li and Redden]( https://doi.org/10.1002/sim.6344) and 
-[Rogers and Stoner](https://pubmed.ncbi.nlm.nih.gov/26998504/), who assessed 
-the suitability of different sandwich estimators on (rare-event) binomial data. 
+Since I would be very much interested in porting the work from
+[Li and Redden]( https://doi.org/10.1002/sim.6344) and
+[Rogers and Stoner](https://pubmed.ncbi.nlm.nih.gov/26998504/), who assessed
+the suitability of different sandwich estimators on (rare-event) binomial data.
 
-In this context, it would be nice to have a wrapper / convenience function for 
-GEEs. Note that with geesmv, we always need to refit the entire GEE, which is 
-inefficient. Luckily, as both geeM as the sandwich part of geesmv are written 
-entirily in R, we can easily write a convenience function that e.g. fits a GEE 
-with LZ, and can than compute alternative standard errors without 
+In this context, it would be nice to have a wrapper / convenience function for
+GEEs. Note that with geesmv, we always need to refit the entire GEE, which is
+inefficient. Luckily, as both geeM as the sandwich part of geesmv are written
+entirily in R, we can easily write a convenience function that e.g. fits a GEE
+with LZ, and can than compute alternative standard errors without
 refitting the GEE.
 
 For our application, it would suffice to do this for a poisson link GEE only.
@@ -251,8 +251,8 @@ sqrt(pan.exch$cov.beta)
 
 # A Wald sandwich, please
 
-Adopting the sandwich package in a helper function that tests provided contrasts 
-in `glm` (i.e., not `GEE`) models. In the example above, we only have 1 contrast 
+Adopting the sandwich package in a helper function that tests provided contrasts
+in `glm` (i.e., not `GEE`) models. In the example above, we only have 1 contrast
 to be tested.
 
 ```{r}
@@ -277,7 +277,7 @@ rownames(L) <- colnames(design)
 L["group_idtreat", 1] <- 1
 
 # no sandwich
-pois.res <- GEEutils::glmWaldtest(
+pois.res <- GEEutils::glmWaldTest(
     models = list(pois.model),
     contrast = L[, 1],
     sandwich = FALSE,
@@ -286,7 +286,7 @@ pois.res <- GEEutils::glmWaldtest(
 pois.res$se
 
 # LZ sandwich
-pois.res <- GEEutils::glmWaldtest(
+pois.res <- GEEutils::glmWaldTest(
     models = list(pois.model),
     contrast = L[, 1],
     sandwich = TRUE,
@@ -295,7 +295,7 @@ pois.res <- GEEutils::glmWaldtest(
 pois.res$se
 
 # LZ sandwich adjusted for small sample size
-pois.res <- GEEutils::glmWaldtest(
+pois.res <- GEEutils::glmWaldTest(
     models = list(pois.model),
     contrast = L[, 1],
     sandwich = TRUE,
@@ -305,7 +305,7 @@ pois.res <- GEEutils::glmWaldtest(
 pois.res$se
 ```
 
-Note that the `glmWaldtest` function is flexible towards "multi-contrast" 
+Note that the `glmWaldTest` function is flexible towards "multi-contrast"
 settings. I demonstrate this using new simulated data, mimicking a multi-patient
 multi-celltype setting.
 
@@ -343,7 +343,7 @@ L
 ```{r}
 # no sandwich
 pois.res <- lapply(seq_len(ncol(L)), function(i) {
-    GEEutils::glmWaldtest(
+    GEEutils::glmWaldTest(
         models = list(pois.model),
         contrast = L[, i],
         sandwich = FALSE
@@ -353,7 +353,7 @@ unlist(pois.res)[c(2, 7, 12)]
 
 # LZ sandwich
 pois.res <- lapply(seq_len(ncol(L)), function(i) {
-    GEEutils::glmWaldtest(
+    GEEutils::glmWaldTest(
         models = list(pois.model),
         contrast = L[, i],
         sandwich = TRUE,
@@ -364,7 +364,7 @@ unlist(pois.res)[c(2, 7, 12)]
 
 # LZ sandwich adjusted for small sample size
 pois.res <- lapply(seq_len(ncol(L)), function(i) {
-    GEEutils::glmWaldtest(
+    GEEutils::glmWaldTest(
         models = list(pois.model),
         contrast = L[, i],
         sandwich = TRUE,
