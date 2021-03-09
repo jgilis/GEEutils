@@ -130,6 +130,10 @@ filterBySample <- function(object,
     # NOTE: the >0 could also be >count, with count an input of filterBySample
   }
   
-  return(object[-which(rownames(object) %in% unique(remove)),])
+  if(length(remove) == 0){
+    return(object)
+  } else {
+    return(object[-which(rownames(object) %in% unique(remove)), ])
+  }
 }
 
