@@ -4,12 +4,17 @@
 \alias{bakery}
 \title{Compute robust standard error estimates using multiple sandwich strategies}
 \usage{
-bakery(formula, id, data, family, corstr, extraSandwich = "none")
+bakery(response, formula, id, data, family, corstr, extraSandwich = "none")
 }
 \arguments{
+\item{response}{A \code{numeric} response vector. In the context of single-cell
+transcriptomics, it is the expression vector of a single gene.}
+
 \item{formula}{A formula expression as for other regression models, of the
 form response ~ predictors. See the documentation of \code{lm} and \code{formula} for
-details.}
+details. It is possible to provide offsets to the model by including
+offset(my_offsets) to the model, with my_offsets a vector of precomputed
+offsets.}
 
 \item{id}{A \code{vector} which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
@@ -20,7 +25,8 @@ formula.}
 occurring in the formula, along with the id and n variables.}
 
 \item{family}{A \verb{character string} indicating the family for defining link
-and variance functions. Currently, only "poisson" is supported.}
+and variance functions. Currently, only "poisson" and "binomial are
+supported.}
 
 \item{corstr}{A \verb{character string} specifying the correlation structure.
 Default is "exchangeable". The following are permitted: "independence",
@@ -51,7 +57,8 @@ data <- data.frame(gene, group_id, patient_id)
 
 ## Run bakery with KC and Pan extra sandwiches
 out <- bakery(
-    formula = gene ~ group_id,
+    response = gene,
+    formula = ~ group_id,
     id = "patient_id",
     data = data,
     family = "poisson",

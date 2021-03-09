@@ -5,10 +5,23 @@
 \title{Compute robust standard error estimates using multiple sandwich strategies
 for SingleCellExperiment input}
 \usage{
-bakerySCE(object, id, corstr, extraSandwich = "none", family = "poisson")
+bakerySCE(
+  object,
+  formula,
+  id,
+  corstr,
+  extraSandwich = "none",
+  family = "poisson"
+)
 }
 \arguments{
 \item{object}{A \code{SingleCellExperiment} object}
+
+\item{formula}{A formula expression as for other regression models,
+of the form response ~ predictors. See the documentation of lm and formula
+for details. It is possible to provide offsets to the model by including
+offset(my_offsets) to the model, where my_offsets must be in the \code{colData}
+of the object.}
 
 \item{id}{A \code{vector} which identifies the clusters. The length of id should
 be the same as the number of observations. Data are assumed to be sorted so
@@ -28,7 +41,8 @@ set to "none", only the naive model standard error and the robust estimator
 from Liang and Zeger will be provided.}
 
 \item{family}{A \verb{character string} indicating the family for defining link
-and variance functions. Currently, only "poisson" is supported.}
+and variance functions. Currently, only "poisson" and binomial are
+supported.}
 }
 \value{
 An updated \code{SingleCellExperiment} object. The fitted GEE models for
@@ -45,9 +59,8 @@ sce <- mockSCE(ncells = 400, ngenes = 10)
 sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
 sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 
-metadata(sce)$formula <- ~sce$group_id
-
 sce_fitted <- bakerySCE(object = sce,
+                        formula = ~ group_id, 
                         id = "patient_id",
                         corstr = "independence",
                         extraSandwich = "none",

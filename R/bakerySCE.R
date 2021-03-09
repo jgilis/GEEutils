@@ -5,6 +5,12 @@
 #'   strategies for SingleCellExperiment input
 #'
 #' @param object A `SingleCellExperiment` object
+#' 
+#' @param formula A formula expression as for other regression models,
+#' of the form response ~ predictors. See the documentation of lm and formula 
+#' for details. It is possible to provide offsets to the model by including
+#' offset(my_offsets) to the model, where my_offsets must be in the `colData`
+#' of the object.
 #'
 #' @param id A `vector` which identifies the clusters. The length of id should
 #'   be the same as the number of observations. Data are assumed to be sorted so
@@ -24,7 +30,8 @@
 #'   from Liang and Zeger will be provided.
 #'
 #' @param family A `character string` indicating the family for defining link
-#'   and variance functions. Currently, only "poisson" is supported.
+#'   and variance functions. Currently, only "poisson" and binomial are 
+#'   supported.
 #'
 #' @return An updated `SingleCellExperiment` object. The fitted GEE models for
 #' each gene can be retrieved from the `rowData` slot.
@@ -40,9 +47,8 @@
 #' sce$patient_id <- factor(rep(paste0("patient", 1:8), each = ncol(sce) / 8))
 #' sce$group_id <- factor(rep(paste0("group", 1:2), each = ncol(sce) / 2))
 #'
-#' metadata(sce)$formula <- ~sce$group_id
-#'
 #' sce_fitted <- bakerySCE(object = sce,
+#'                         formula = ~ group_id, 
 #'                         id = "patient_id",
 #'                         corstr = "independence",
 #'                         extraSandwich = "none",
@@ -57,6 +63,7 @@
 #'
 #' @export
 bakerySCE <- function(object,
+                      formula,
                       id,
                       corstr,
                       extraSandwich = "none",
@@ -64,19 +71,17 @@ bakerySCE <- function(object,
 
   counts <- assays(object)[["counts"]] #hard-coded to take assay "counts"
   data <- as.data.frame(colData(object))
-  design <- model.matrix(metadata(object)$formula, data = data)
 
   geefit <- lapply(1:nrow(counts), function(i) {
-
-    #TODO: could wrap an updated eval_fork around bakery
-    geefit_i <- suppressMessages(bakery(
-      formula = counts[i,] ~ -1+design,
-      id = id,
-      data = data,
-      family = family,
-      corstr = corstr,
-      extraSandwich = extraSandwich
-    ))
+      geefit_i <- try(suppressMessages(bakery(
+          response = counts[i,],
+          formula = formula,
+          id = id,
+          data = data,
+          family = family,
+          corstr = corstr,
+          extraSandwich = extraSandwich
+      )))
   })
   names(geefit) <- rownames(counts)
 
