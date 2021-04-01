@@ -74,6 +74,8 @@ bakerySCE <- function(object,
                       family = "poisson",
                       assay = NULL) {
   
+  object <- object[,order(object[[id]])] # reorder object on id variable for gee
+  
   if (is.null(assay)) {
     assay <- assayNames(object)[[1]]
   }
