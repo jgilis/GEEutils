@@ -11,7 +11,8 @@ bakerySCE(
   id,
   corstr,
   extraSandwich = "none",
-  family = "poisson"
+  family = "poisson",
+  assay = NULL
 )
 }
 \arguments{
@@ -43,6 +44,10 @@ from Liang and Zeger will be provided.}
 \item{family}{A \verb{character string} indicating the family for defining link
 and variance functions. Currently, only "poisson" and binomial are
 supported.}
+
+\item{assay}{A \code{character} specifying which \code{assay} from the
+\code{SingleCellExperiment} to use. If \code{NULL} will use the first one in
+\code{assayNames(object)}.}
 }
 \value{
 An updated \code{SingleCellExperiment} object. The fitted GEE models for

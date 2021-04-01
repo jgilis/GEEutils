@@ -13,25 +13,29 @@
 #' of the object.
 #'
 #' @param id A `vector` which identifies the clusters. The length of id should
-#'   be the same as the number of observations. Data are assumed to be sorted so
-#'   that observations on a cluster are contiguous rows for all entities in the
-#'   formula.
+#' be the same as the number of observations. Data are assumed to be sorted so
+#' that observations on a cluster are contiguous rows for all entities in the
+#' formula.
 #'
 #' @param corstr A `character string` specifying the correlation structure.
-#'   Default is "exchangeable". The following are permitted: "independence",
-#'   "fixed", "stat_M_dep", "non_stat_M_dep", "exchangeable", "AR-M" and
-#'   "unstructured".
+#' Default is "exchangeable". The following are permitted: "independence",
+#' "fixed", "stat_M_dep", "non_stat_M_dep", "exchangeable", "AR-M" and
+#' "unstructured".
 #'
 #' @param extraSandwich A `character vector` of sandwich estimation procedures
-#'   that must be used to compute robust standard errors, additional to the
-#'   model standard error and the robust estimator from Liang and Zeger. The
-#'   following are permitted: "none", "DF", "KC" and "Pan". If not specified or
-#'   set to "none", only the naive model standard error and the robust estimator
-#'   from Liang and Zeger will be provided.
+#' that must be used to compute robust standard errors, additional to the
+#' model standard error and the robust estimator from Liang and Zeger. The
+#' following are permitted: "none", "DF", "KC" and "Pan". If not specified or
+#' set to "none", only the naive model standard error and the robust estimator
+#' from Liang and Zeger will be provided.
 #'
 #' @param family A `character string` indicating the family for defining link
-#'   and variance functions. Currently, only "poisson" and binomial are 
-#'   supported.
+#' and variance functions. Currently, only "poisson" and binomial are 
+#' supported.
+#'   
+#' @param assay A `character` specifying which `assay` from the
+#' `SingleCellExperiment` to use. If `NULL` will use the first one in
+#' `assayNames(object)`.
 #'
 #' @return An updated `SingleCellExperiment` object. The fitted GEE models for
 #' each gene can be retrieved from the `rowData` slot.
@@ -59,7 +63,7 @@
 #'
 #' @importFrom stats model.matrix
 #' @importFrom S4Vectors metadata
-#' @importFrom SummarizedExperiment assays colData rowData rowData<-
+#' @importFrom SummarizedExperiment assayNames assays colData rowData rowData<-
 #'
 #' @export
 bakerySCE <- function(object,
@@ -67,9 +71,15 @@ bakerySCE <- function(object,
                       id,
                       corstr,
                       extraSandwich = "none",
-                      family = "poisson") {
+                      family = "poisson",
+                      assay = NULL) {
+  
+  if (is.null(assay)) {
+    assay <- assayNames(object)[[1]]
+  }
+  stopifnot(assay %in% assayNames(object))
 
-  counts <- assays(object)[["counts"]] #hard-coded to take assay "counts"
+  counts <- assays(object)[[assay]]
   data <- as.data.frame(colData(object))
 
   geefit <- lapply(1:nrow(counts), function(i) {
