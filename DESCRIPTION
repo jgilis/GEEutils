@@ -13,34 +13,7 @@ Authors@R: c(
 Description: Aggregation of utility functions for working with Generalized Estimation Equations.
 Depends: R (>= 4.0)
 Imports:
-    scater,
-    ggplot2,
-    fitdistrplus,
-    SummarizedExperiment,
-    stats,
-    gee,
-    gdata,
-    geesmv,
-    sandwich,
-    data.table,
-    purrr,
-    utils,
-    methods,
-    S4Vectors,
-    Matrix
 Suggests:
-    knitr,
-    rmarkdown,
-    testthat,
-    covr,
-    BiocStyle,
-    ExperimentHub,
-    magrittr,
-    dplyr,
-    SingleCellExperiment,
-    geepack,
-    geeM,
-    scuttle
 VignetteBuilder: knitr
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
