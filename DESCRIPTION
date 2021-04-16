@@ -13,7 +13,12 @@ Authors@R: c(
 Description: Aggregation of utility functions for working with Generalized Estimation Equations.
 Depends: R (>= 4.0)
 Imports:
-Suggests:
+    edgeR,
+    Matrix,
+    SingleCellExperiment,
+    methods,
+    stats,
+    SummarizedExperiment
 VignetteBuilder: knitr
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
