@@ -49,17 +49,12 @@ fitGLM <- function(sce, formula,
 
     offsets <- .handle_offsets(Y = Y, offsets = offsets)
 
-    ## Make formula of the form "y ~ ..." and include offsets
-    cd$offsets <- offsets
-    formula <- as.formula(
-        paste("y", paste(formula, collapse = " "), "+ offset(offsets)")
-    )
-
     ## Fit GLM for each gene
     # TODO: this can be easily parallelized, look into beachmat::rowBlockApply()
     apply(Y, 1,
         FUN = .fit_glm,
         formula = formula,
+        offsets = offsets,
         family = family,
         cd = cd,
         ...,
@@ -70,8 +65,14 @@ fitGLM <- function(sce, formula,
 
 ## Helper to fit single GLM from count vector and formula
 #' @importFrom stats glm
-.fit_glm <- function(y, formula, family, cd, ...) {
+.fit_glm <- function(y, offsets, formula, family, cd, ...) {
+    ## Make formula of the form "y ~ ..." and include offsets
+    cd$offsets <- offsets
     cd$y <- y
+    formula <- as.formula(
+        paste("y", paste(formula, collapse = " "), "+ offset(offsets)")
+    )
+
     glm(formula = formula, family = family, data = cd, ...)
 }
 
