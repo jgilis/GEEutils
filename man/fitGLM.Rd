@@ -41,7 +41,8 @@ length equal to the number of cells in the data.
 }
 \examples{
 ## Mock up data set
-sce <- scuttle::mockSCE(ncells = 100, ngenes = 500)
+library(scuttle)
+sce <- mockSCE(ncells = 100, ngenes = 500)
 colData(sce)
 
 ## Fit model using available colData columns

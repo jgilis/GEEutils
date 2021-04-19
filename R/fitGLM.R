@@ -23,7 +23,8 @@
 #'
 #' @examples
 #' ## Mock up data set
-#' sce <- scuttle::mockSCE(ncells = 100, ngenes = 500)
+#' library(scuttle)
+#' sce <- mockSCE(ncells = 100, ngenes = 500)
 #' colData(sce)
 #'
 #' ## Fit model using available colData columns
@@ -33,6 +34,7 @@
 #'
 #' @export
 #' @importFrom SingleCellExperiment counts
+#' @importFrom stats as.formula
 fitGLM <- function(sce, formula,
                    family = c("poisson", "quasipoisson"),
                    offsets = "TMM",

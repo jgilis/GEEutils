@@ -18,7 +18,8 @@ Imports:
     SingleCellExperiment,
     methods,
     stats,
-    SummarizedExperiment
+    SummarizedExperiment,
+    sandwich
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
 Encoding: UTF-8
