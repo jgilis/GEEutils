@@ -34,3 +34,5 @@ biocViews:
     SingleCell,
     Transcriptomics,
     MultipleComparison
+Suggests: 
+    scuttle

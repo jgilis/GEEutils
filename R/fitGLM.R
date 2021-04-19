@@ -1,5 +1,8 @@
 #' Fitting a Generalized Linear Model
 #'
+#' Fit a (quasi-)Poisson Generalized Linear Model using [stats::glm()], for
+#' further use in DE testing.
+#'
 #' @param sce A \linkS4class{SingleCellExperiment} object.
 #' @param formula An object of class ["formula"][stats::formula] or a character
 #'   string that can be coerced to one. Entries in the formula should refer to
@@ -11,12 +14,22 @@
 #' @param ... Further arguments passed on to [stats::glm()].
 #'
 #' @details
-#' The `offsets` ............
+#' The `offsets` are calculated using [edgeR::calcNormFactors()] by default
+#' (`method = "TMM"`). Alternatively, a vector of offsets can be provided with
+#' length equal to the number of cells in the data.
 #'
 #' @return
 #' A list of `"glm"` objects for each gene.
 #'
 #' @examples
+#' ## Mock up data set
+#' sce <- scuttle::mockSCE(ncells = 100, ngenes = 500)
+#' colData(sce)
+#'
+#' ## Fit model using available colData columns
+#' model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
+#' class(model_fits)
+#' length(model_fits)
 #'
 #' @export
 #' @importFrom SingleCellExperiment counts
@@ -32,7 +45,7 @@ fitGLM <- function(sce, formula,
 
     ## Requires raw counts
     Y <- counts(sce)
-    cd <- colData(sce)
+    cd <- as.data.frame(colData(sce))
 
     offsets <- .handle_offsets(Y = Y, offsets = offsets)
 

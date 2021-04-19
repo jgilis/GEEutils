@@ -31,11 +31,22 @@ calculate offsets or a numeric vector providing the offsets.}
 A list of \code{"glm"} objects for each gene.
 }
 \description{
-Fitting a Generalized Linear Model
+Fit a (quasi-)Poisson Generalized Linear Model using \code{\link[stats:glm]{stats::glm()}}, for
+further use in DE testing.
 }
 \details{
-The \code{offsets} ............
+The \code{offsets} are calculated using \code{\link[edgeR:calcNormFactors]{edgeR::calcNormFactors()}} by default
+(\code{method = "TMM"}). Alternatively, a vector of offsets can be provided with
+length equal to the number of cells in the data.
 }
 \examples{
+## Mock up data set
+sce <- scuttle::mockSCE(ncells = 100, ngenes = 500)
+colData(sce)
+
+## Fit model using available colData columns
+model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
+class(model_fits)
+length(model_fits)
 
 }
