@@ -101,13 +101,9 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
     effect_size <- comparison$effect_size
     comp_name <- comparison$comp_name
 
-    # TODO: handle type == "LiRedden"
-
-    sandwich_var <- vapply(models, FUN = .glm_sandwich_var,
-        contrast = contrast, coef = coef,
-        subject_id = subject_id, type = type,
-        cadjust = cadjust, fix = fix,
-        FUN.VALUE = numeric(NCOL(effect_size))
+    sandwich_var <- .get_beta_vars(
+        models = models, coef = coef, contrast = contrast,
+        subject_id = subject_id, type = type, cadjust = cadjust, fix = fix
     )
 
     se <- sqrt(sandwich_var)
@@ -144,7 +140,6 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
         if (is.null(coef)) {
             stop("Need to provide either `coef` or `contrast`.", call. = FALSE)
         } else {
-
             stopifnot(length(coef) == 1) # currently only support testing single coef
 
             if (is.character(coef)) {
@@ -196,6 +191,19 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
         }
     }
     list(effect_size = out, comp_name = comparison)
+}
+
+
+.get_beta_vars <- function(models, coef, contrast, subject_id, type, cadjust, fix) {
+    # TODO: handle type == "LiRedden"
+    out <- vapply(models, FUN = .glm_sandwich_var,
+        contrast = contrast, coef = coef,
+        subject_id = subject_id, type = type,
+        cadjust = cadjust, fix = fix,
+        FUN.VALUE = numeric(1)  # expects just one coefficient or contrast!
+    )
+
+    out
 }
 
 
