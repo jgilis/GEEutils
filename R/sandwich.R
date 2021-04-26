@@ -81,10 +81,10 @@
 #'
 #' @export
 #' @importFrom stats df.residual p.adjust pnorm
-glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
-                            subject_id = NULL,
-                            type = c("HC0", "HC1", "HC2", "HC3", "LiRedden"),
-                            cadjust = TRUE, fix = FALSE) {
+glmSandwichTest <- function(models, subject_id,
+                            coef = NULL, contrast = NULL,
+                            type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
+                            cadjust = FALSE, fix = FALSE) {
 
     type <- match.arg(type)
 
@@ -101,10 +101,11 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
     effect_size <- comparison$effect_size
     comp_name <- comparison$comp_name
 
-    sandwich_var <- .get_beta_vars(
+    sandwich_out <- .get_beta_vars(
         models = models, coef = coef, contrast = contrast,
         subject_id = subject_id, type = type, cadjust = cadjust, fix = fix
     )
+    sandwich_var <- sandwich_out$beta_vars
 
     se <- sqrt(sandwich_var)
     wald_stats <- effect_size / se
@@ -113,7 +114,7 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
     fdr <- p.adjust(pvals, method = "fdr")
 
     gene_names <- names(models)
-    data.frame(
+    tab <- data.frame(
         logFC = effect_size / log(2),
         SE = se,
         Wald = wald_stats,
@@ -122,6 +123,12 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
         comparison = comp_name,
         row.names = gene_names
     )
+    params <- c(
+        subject_id = subject_id,
+        sandwich_out$params
+    )
+    ## Return params and table
+    list(params = params, table = tab)
 }
 
 
@@ -195,15 +202,42 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
 
 
 .get_beta_vars <- function(models, coef, contrast, subject_id, type, cadjust, fix) {
-    # TODO: handle type == "LiRedden"
-    out <- vapply(models, FUN = .glm_sandwich_var,
+    adjust_LR <- FALSE
+    if (type == "LiRedden") {
+        type <- "HC0"
+        if (is.null(subject_id)) {
+            warning(
+                '`type = "LiRedden"` is only relevant when `subject_id` is provided.',
+                '\nFalling back to `type = "HC0"` without further adjustment.'
+            )
+        } else {
+            cadjust <- fix <- FALSE
+            adjust_LR <- TRUE
+            lr_adjustment <- .LR_adjustment(models[[1]], subject_id = subject_id)
+        }
+    }
+
+    if (is.character(subject_id)) {
+        stopifnot(length(subject_id) == 1)
+        subject_id <- as.formula(paste("~", subject_id))
+    }
+
+    beta_vars <- vapply(models, FUN = .glm_sandwich_var,
         contrast = contrast, coef = coef,
         subject_id = subject_id, type = type,
         cadjust = cadjust, fix = fix,
         FUN.VALUE = numeric(1)  # expects just one coefficient or contrast!
     )
 
-    out
+    if (adjust_LR) {
+        type <- "LiRedden"
+        beta_vars <- lr_adjustment * beta_vars
+    }
+
+    list(
+        beta_vars = beta_vars,
+        params = list(type = type, cadjust = cadjust, fix = fix)
+    )
 }
 
 
@@ -211,10 +245,6 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
 ## Returns diagonal elements of the covariance matrix V(beta)
 #' @importFrom sandwich vcovCL
 .glm_sandwich_var <- function(m, coef, contrast, subject_id, type, cadjust, fix) {
-    if (is.character(subject_id)) {
-        stopifnot(length(subject_id) == 1)
-        subject_id <- as.formula(paste("~", subject_id))
-    }
     v <- vcovCL(m,
         cluster = subject_id, sandwich = TRUE, type = type,
         cadjust = cadjust, fix = fix
@@ -227,4 +257,26 @@ glmSandwichTest <- function(models, coef = NULL, contrast = NULL,
         return(diag(v)[coef])
     }
     diag(v)
+}
+
+
+.LR_adjustment <- function(m, subject_id) {
+    d <- m$data
+    if (!(subject_id %in% names(d))) {
+        stop(
+            "`subject_id` '", subject_id, "' not found in fit data.",
+            call. = FALSE
+        )
+    }
+    K <- nlevels(factor(d[[subject_id]]))
+    p <- length(m$coefficients)
+
+    # TODO: better way to handle this?
+    if (K < p) {
+        stop(
+            "Number of subjects lower than number of parameters.",
+            "\nLi-Redden adjustment not possible.",
+            call. = FALSE)
+    }
+    K / (K - p)
 }
