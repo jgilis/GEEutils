@@ -1,5 +1,4 @@
 # TODO: add some more details regarding "clustered covariance matrices" and within-subject correlation
-# TODO: add details regarding Li-Redden adjustment
 # TODO: replace example with more sensible case
 
 #' GLM Wald tests using sandwich estimators
@@ -20,23 +19,31 @@
 #'   are considered to be correlated within each subject and
 #'   [sandwich::vcovCL()] is used to estimate the covariance matrix. When
 #'   `subject_id = NULL` (the default), a heteroskedastic-consistent sandwich
-#'   estimator is used (equivalent to [sandwich::vcovHC()]). Can also provide a
-#'   [formula][stats::formula].
+#'   estimator is used (equivalent to [sandwich::vcovHC()]).
 #' @param type Character string specifying which type of small-sample bias
 #'   adjustment to be applied. Possible values are `"HC0"` to `"HC3"` or
 #'   `"LiRedden"`. For details on the `"HC*"` adjustments see
 #'   [sandwich::vcovCL()], for `"LiRedden"` see "Details" below. The default is
-#'   to use `"HC0"`, which corresponds to White's estimator.
+#'   to use `"LiRedden"`.
 #' @param cadjust Logical, whether to apply cluster bias adjustment. Where
 #'   "cluster" refers to the subject-level grouping of the observations. Only
 #'   relevant if `subject_id` is provided. See [sandwich::vcovCL()] for details.
-#'   Default: `TRUE`.
+#'   Default: `TRUE`. When using `type = "LiRedden"`, this will be set to
+#'   `FALSE` internally.
 #' @param fix Logical, whether to fix the covariance matrix to be positive
 #'   semi-definite in case it's not. See [sandwich::vcovCL()] for details.
-#'   Default: `FALSE`.
+#'   Default: `FALSE`. Only relevant for `type = "HC2"` or `"HC3"`.
 #'
 #' @details
-#' The `"LiRedden"` adjustment......................
+#' ## Small sample size adjustments
+#'
+#' Note that 'sample size' here refers to the number of subjects, *not* the
+#' number of cells.
+#'
+#' The `"LiRedden"` adjustment uses the degrees-of-freedom correction proposed
+#' in Li & Redden (2015). Briefly, the variances of \eqn{\hat{\beta}} are
+#' multiplied with \eqn{K/(K-p)}, where \eqn{K} is the number of subjects and
+#' \eqn{p} is the number of regression parameters.
 #'
 #' @return
 #' A `data.frame` with a row for each gene and the following columns:
@@ -50,8 +57,15 @@
 #'
 #' @seealso [sandwich::vcovCL()]
 #' @references
-#' Zeileis (2020)
-#' Li & Redden (2015)
+#' Li P. and Redden D. T. 'Small sample performance of bias-corrected sandwich
+#' estimators for cluster-randomized trials with binary outcomes', *Statistics
+#' in Medicine* __34__(2), 281–296 (2015).
+#' doi: [10.1002/sim.6344](https://doi.org/10.1002/sim.6344).
+#'
+#' Zeileis A., Köll S. and Graham N. (2020). 'Various Versatile Variances: An
+#' Object-Oriented Implementation of Clustered Covariances in R', *Journal of
+#' Statistical Software*, __95__(1), 1–36.
+#' doi: [10.18637/jss.v095.i01](https://doi.org/10.18637/jss.v095.i01).
 #'
 #' @examples
 #' ## Mock up data set
@@ -62,22 +76,15 @@
 #' ## Fit model using available colData columns
 #' model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
 #'
-#' ## Test for Treatment effect using a HC sandwich estimator with HC3 adjustment
-#' res_HC3 <- glmSandwichTest(
+#' ## Test for Treatment effect using a clustered sandwich estimator with
+#' ## Li-Redden adjustment
+#' res <- glmSandwichTest(
 #'     model_fits,
 #'     coef = "Treatmenttreat2",
-#'     type = "HC3"
+#'     subject_id = "Cell_Cycle",
+#'     type = "LiRedden"
 #' )
-#' head(res_HC3)
-#'
-#' ## Test for Treatment effect using a Clustered sandwich estimator with HC3 adjustment
-#' ## Assuming cells are correlated within each "Cell_Cycle" level
-#' res_CL <- glmSandwichTest(
-#'     model_fits,
-#'     coef = "Treatmenttreat2",
-#'     subject_id = "Cell_Cycle", type = "HC3"
-#' )
-#' head(res_CL)
+#' head(res$table)
 #'
 #' @export
 #' @importFrom stats df.residual p.adjust pnorm

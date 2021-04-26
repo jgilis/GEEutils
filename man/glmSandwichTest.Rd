@@ -6,16 +6,23 @@
 \usage{
 glmSandwichTest(
   models,
+  subject_id,
   coef = NULL,
   contrast = NULL,
-  subject_id = NULL,
-  type = c("HC0", "HC1", "HC2", "HC3", "LiRedden"),
-  cadjust = TRUE,
+  type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
+  cadjust = FALSE,
   fix = FALSE
 )
 }
 \arguments{
 \item{models}{List of \code{glm} models, resulting from \code{\link[=fitGLM]{fitGLM()}}.}
+
+\item{subject_id}{Optional character string specifying a column in the
+original data indicating subject IDs. When this is specified, observations
+are considered to be correlated within each subject and
+\code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} is used to estimate the covariance matrix. When
+\code{subject_id = NULL} (the default), a heteroskedastic-consistent sandwich
+estimator is used (equivalent to \code{\link[sandwich:vcovHC]{sandwich::vcovHC()}}).}
 
 \item{coef}{Character string or numeric scalar specifying the coefficient to
 be tested. Ignored if \code{contrast} is provided.}
@@ -24,28 +31,21 @@ be tested. Ignored if \code{contrast} is provided.}
 coefficients to be tested. Should have length equal to the number of
 coefficients in the model. Takes precedence over \code{coef}.}
 
-\item{subject_id}{Optional character string specifying a column in the
-original data indicating subject IDs. When this is specified, observations
-are considered to be correlated within each subject and
-\code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} is used to estimate the covariance matrix. When
-\code{subject_id = NULL} (the default), a heteroskedastic-consistent sandwich
-estimator is used (equivalent to \code{\link[sandwich:vcovHC]{sandwich::vcovHC()}}). Can also provide a
-\link[stats:formula]{formula}.}
-
 \item{type}{Character string specifying which type of small-sample bias
 adjustment to be applied. Possible values are \code{"HC0"} to \code{"HC3"} or
 \code{"LiRedden"}. For details on the \code{"HC*"} adjustments see
 \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}}, for \code{"LiRedden"} see "Details" below. The default is
-to use \code{"HC0"}, which corresponds to White's estimator.}
+to use \code{"LiRedden"}.}
 
 \item{cadjust}{Logical, whether to apply cluster bias adjustment. Where
 "cluster" refers to the subject-level grouping of the observations. Only
 relevant if \code{subject_id} is provided. See \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} for details.
-Default: \code{TRUE}.}
+Default: \code{TRUE}. When using \code{type = "LiRedden"}, this will be set to
+\code{FALSE} internally.}
 
 \item{fix}{Logical, whether to fix the covariance matrix to be positive
 semi-definite in case it's not. See \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} for details.
-Default: \code{FALSE}.}
+Default: \code{FALSE}. Only relevant for \code{type = "HC2"} or \code{"HC3"}.}
 }
 \value{
 A \code{data.frame} with a row for each gene and the following columns:
@@ -65,7 +65,16 @@ estimator}, implemented in \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}}, to
 within-subject correlations.
 }
 \details{
-The \code{"LiRedden"} adjustment......................
+\subsection{Small sample size adjustments}{
+
+Note that 'sample size' here refers to the number of subjects, \emph{not} the
+number of cells.
+
+The \code{"LiRedden"} adjustment uses the degrees-of-freedom correction proposed
+in Li & Redden (2015). Briefly, the variances of \eqn{\hat{\beta}} are
+multiplied with \eqn{K/(K-p)}, where \eqn{K} is the number of subjects and
+\eqn{p} is the number of regression parameters.
+}
 }
 \examples{
 ## Mock up data set
@@ -76,27 +85,27 @@ colData(sce)
 ## Fit model using available colData columns
 model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
 
-## Test for Treatment effect using a HC sandwich estimator with HC3 adjustment
-res_HC3 <- glmSandwichTest(
+## Test for Treatment effect using a clustered sandwich estimator with
+## Li-Redden adjustment
+res <- glmSandwichTest(
     model_fits,
     coef = "Treatmenttreat2",
-    type = "HC3"
+    subject_id = "Cell_Cycle",
+    type = "LiRedden"
 )
-head(res_HC3)
-
-## Test for Treatment effect using a Clustered sandwich estimator with HC3 adjustment
-## Assuming cells are correlated within each "Cell_Cycle" level
-res_CL <- glmSandwichTest(
-    model_fits,
-    coef = "Treatmenttreat2",
-    subject_id = "Cell_Cycle", type = "HC3"
-)
-head(res_CL)
+head(res$table)
 
 }
 \references{
-Zeileis (2020)
-Li & Redden (2015)
+Li P. and Redden D. T. 'Small sample performance of bias-corrected sandwich
+estimators for cluster-randomized trials with binary outcomes', \emph{Statistics
+in Medicine} \strong{34}(2), 281–296 (2015).
+doi: \href{https://doi.org/10.1002/sim.6344}{10.1002/sim.6344}.
+
+Zeileis A., Köll S. and Graham N. (2020). 'Various Versatile Variances: An
+Object-Oriented Implementation of Clustered Covariances in R', \emph{Journal of
+Statistical Software}, \strong{95}(1), 1–36.
+doi: \href{https://doi.org/10.18637/jss.v095.i01}{10.18637/jss.v095.i01}.
 }
 \seealso{
 \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}}
