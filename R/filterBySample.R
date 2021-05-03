@@ -1,27 +1,23 @@
-#' Function for gene-level filtering.
+#' Filter genes by expression per sample
 #'
-#' @description Function for gene-level filtering. Removes genes that are
-#' expressed in less than a certain number of samples (default = 2) in any of
-#' the experimental groups of interest. To be used in combination with
-#' `filterByExpr` from the edgeR package.
+#' Function for gene-level filtering. Removes genes that are expressed in less
+#' than a certain number of samples (default = 2). Note: "samples" here refers
+#' to the biological subjects from which the data was obtained.
 #'
-#' @param object A `SingleCellExperiment` object
-#'
-#' @param sample_id A `vector` which identifies the samples or experimental
-#' units. Must be one of the column names in the `colData` of the provided
-#' `SingleCellExperiment` object
-#'
-#' @param size A `number` defining the minimum amount of samples that must
-#' express a gene for the gene to pass the filtering. Defaults to 2.
-#'
+#' @param object A \linkS4class{SingleCellExperiment} object
+#' @param sample_id A `character` which identifies the samples or experimental
+#'   units. Must be one of the column names in the `colData` of the provided
+#'   \linkS4class{SingleCellExperiment} object
+#' @param size An `integer` defining the minimum number of samples that must
+#'   express a gene for the gene to pass the filtering. Defaults to 2.
 #' @param use_assay A `character` or `integer` specifying which `assay` from the
-#' `SingleCellExperiment` to use. Default: `1L`, which will use the first assay
-#' in `assayNames(object)`.
+#'   \linkS4class{SingleCellExperiment} to use. The default is to use the first
+#'   assay in `assayNames(object)`.
 #'
-#' @return An updated `SingleCellExperiment` object, with all genes that did
-#' not pass the filtering removed.
+#' @return An updated \linkS4class{SingleCellExperiment} object, with all genes
+#'   that did not pass the filtering removed.
 #'
-#' @author Jeroen Gilis
+#' @author Jeroen Gilis, Milan Malfait
 #'
 #' @examples
 #' library(scuttle)
