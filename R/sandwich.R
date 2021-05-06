@@ -237,8 +237,8 @@ glmSandwichTest <- function(models, subject_id,
     )
 
     if (adjust_LR) {
-        type <- "LiRedden"
-        beta_vars <- lr_adjustment * beta_vars
+        type <- lr_adjustment$type
+        beta_vars <- lr_adjustment$out * beta_vars
     }
 
     list(
@@ -278,12 +278,19 @@ glmSandwichTest <- function(models, subject_id,
     K <- nlevels(factor(d[[subject_id]]))
     p <- length(m$coefficients)
 
-    # TODO: better way to handle this?
-    if (K < p) {
-        stop(
-            "Number of subjects lower than number of parameters.",
+    if (K <= p) {
+        warning(
+            "Number of subjects (", K, "), ",
+            "lower than number of parameters (", p, ").",
             "\nLi-Redden adjustment not possible.",
-            call. = FALSE)
+            "\nFalling back to `type = 'HC0'`.",
+            call. = FALSE
+        )
+        type <- "HC0"
+        out <- 1 # no LR adjustment == HC0
+    } else {
+        type <- "LiRedden"
+        out <- K / (K - p)
     }
-    K / (K - p)
+    list(out = out, type = type)
 }
