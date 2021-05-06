@@ -62,3 +62,27 @@ test_that("glmSandwichTest() fails and warns when necessary", {
     )
     expect_identical(out$params$type, "HC0")
 })
+
+
+## Replace subject_id column with only 2 subjects, which is lower than the 3
+## parameters in the GLM fits
+n_subjects <- 2
+sce2 <- sce
+sce2$subject_id <- rep(paste0("subject", 1:n_subjects), each = ncol(sce) / n_subjects)
+model_fits2 <- fitGLM(sce2, ~ Mutation_Status + Treatment)
+
+## Reference: HC0 adjustment, if K < p, LiRedden should be identical to this
+ref_HC0 <- glmSandwichTest(
+    model_fits2, subject_id = "subject_id", coef = 3, type = "HC0"
+)
+
+test_that("LiRedden adjustment handles K <= p correctly", {
+    expect_warning(
+        out <- glmSandwichTest(
+            model_fits2,
+            subject_id = "subject_id", coef = 3, type = "LiRedden"
+        )
+    )
+    expect_identical(out$params$type, "HC0")
+    expect_identical(out, ref_HC0)
+})
