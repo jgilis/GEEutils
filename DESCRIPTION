@@ -11,7 +11,7 @@ Authors@R: c(
            comment = c(ORCID = "0000-0001-9144-3701"))
     )
 Description: Aggregation of utility functions for working with Generalized Estimation Equations.
-Depends: R (>= 4.0)
+Depends: R (>= 4.1)
 Imports:
     edgeR,
     Matrix,
