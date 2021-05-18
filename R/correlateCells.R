@@ -31,6 +31,7 @@
 
 
 #' @importFrom utils combn
+#' @importFrom Matrix t
 .get_cell_pairs <- function(cell_idx, type) {
     if (type == "within") {
         out <- lapply(cell_idx, combn, m = 2L)
