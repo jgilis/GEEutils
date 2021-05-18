@@ -1,8 +1,6 @@
+# TODO: add `BPPARAM` argument to pass on to `scran::correlatePairs()`
 .correlate_cells <- function(x, grouping = NULL, type = "within") {
     type <- match.arg(type)
-    cor_fun <- switch(type,
-        within = .within_cor
-    )
 
     n_cells <- ncol(x)
 
@@ -18,29 +16,27 @@
         cell_idx <- split(seq_len(n_cells), grouping, drop = TRUE)
     }
 
-    cor_fun(x, cell_idx)
+    pairings <- .get_cell_pairs(cell_idx, type = type)
+    .calculate_cor(x, pairings)
 }
 
 
-.get_cell_pairs <- function(cell_idx) {
-    out <- combn(cell_idx, 2L)
-    list(cell1 = out[1, ], cell2 = out[2, ])
-}
-
-
-## Within-group cell-wise correlations
-.within_cor <- function(x, cell_idx) {
-    rhos <- vector("list", length = length(cell_idx))
-
-    for (i in seq_along(rhos)) {
-        current_ids <- cell_idx[[i]]
-        pairs <- .get_cell_pairs(current_ids)
-        x1 <- x[, pairs$cell1, drop = FALSE]
-        x2 <- x[, pairs$cell2, drop = FALSE]
-
-        rhos[[i]] <- diag(cor(x1, x2, method = "spearman"))
+#' @importFrom utils combn
+.get_cell_pairs <- function(cell_idx, type) {
+    if (type == "within") {
+        out <- lapply(cell_idx, combn, m = 2L)
     }
-    unlist(rhos)
+    out <- do.call("cbind", out)
+    ## Output: 2-column matrix of cell ID pairs
+    t(out)
+}
+
+
+.calculate_cor <- function(x, pairings) {
+    ## Hack scran::correlatePairs() to correlate cells instead of genes
+    out <- scran::correlatePairs(t(x), pairings = pairings)
+    colnames(out)[c(1, 2)] <- c("cell1", "cell2")
+    out
 }
 
 

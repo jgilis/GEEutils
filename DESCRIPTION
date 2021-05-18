@@ -19,7 +19,9 @@ Imports:
     methods,
     stats,
     SummarizedExperiment,
-    sandwich
+    sandwich,
+    utils,
+    scran
 Suggests: 
     testthat (>= 3.0.0),
     scuttle

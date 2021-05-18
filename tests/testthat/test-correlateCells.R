@@ -13,18 +13,20 @@ x <- logcounts(sce)
 ## Hack around scran::correlatePairs to correlate cells instead of genes
 ref <- scran::correlatePairs(t(x))
 
-test_that("correlateCells() works", {
+test_that("Vanilla correlateCells() works", {
     ## grouping = NULL, type = "within" calculates all pairwise correlations
     out <- correlateCells(sce, grouping = NULL, type = "within")
-    expect_equal(sort(out), sort(ref$rho))
+    expect_equal(sort(out$rho), sort(ref$rho))
+    expect_named(out, c("cell1", "cell2", "rho", "p.value", "FDR"))
 })
 
 test_that("Within-group correlations work", {
+    ## Calculate all pairwise correlations for each subject separately
     ref_A <- correlateCells(sce[, sce$subject == "A"])
     ref_B <- correlateCells(sce[, sce$subject == "B"])
     ref_C <- correlateCells(sce[, sce$subject == "C"])
     out <- correlateCells(sce, grouping = "subject", type = "within")
-    expect_equal(out, c(ref_A, ref_B, ref_C))
+    expect_equal(out$rho, c(ref_A$rho, ref_B$rho, ref_C$rho))
 
     expect_error(correlateCells(x, grouping = "subject"))
 })
