@@ -10,10 +10,10 @@ sce <- logNormCounts(sce)
 
 x <- logcounts(sce)
 
-## Hack around scran::correlatePairs to correlate cells instead of genes
-ref <- scran::correlatePairs(t(x))
-
 test_that("Vanilla correlateCells() works", {
+    ## Hack around scran::correlatePairs to correlate cells instead of genes
+    ref <- scran::correlatePairs(t(x))
+
     ## grouping = NULL, type = "within" calculates all pairwise correlations
     out <- correlateCells(sce, grouping = NULL, type = "within")
     expect_equal(sort(out$rho), sort(ref$rho))
@@ -28,5 +28,15 @@ test_that("Within-group correlations work", {
     out <- correlateCells(sce, grouping = "subject", type = "within")
     expect_equal(out$rho, c(ref_A$rho, ref_B$rho, ref_C$rho))
 
+    ## This only works for SCE inputs
     expect_error(correlateCells(x, grouping = "subject"))
+})
+
+test_that("Between-group correlations work", {
+    ## Calculate how many total cell pairs we should get
+    n_cells <- combn(table(sce$subject), 2)
+    n_pairs <- sum(apply(n_cells, 2, prod))
+    out <- correlateCells(sce, grouping = "subject", type = "between")
+    expect_equal(nrow(out), n_pairs)
+    expect_named(out, c("cell1", "cell2", "rho", "p.value", "FDR"))
 })

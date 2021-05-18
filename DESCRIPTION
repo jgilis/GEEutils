@@ -21,7 +21,8 @@ Imports:
     SummarizedExperiment,
     sandwich,
     utils,
-    scran
+    scran,
+    BiocParallel
 Suggests: 
     testthat (>= 3.0.0),
     scuttle
