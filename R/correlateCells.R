@@ -34,6 +34,8 @@
 #' @importFrom Matrix t
 .get_cell_pairs <- function(cell_idx, type) {
     if (type == "within") {
+        ## Omit subjects with just 1 cell; combn() uses seq_len(n) for integer n
+        cell_idx[lengths(cell_idx) == 1] <- NULL
         out <- lapply(cell_idx, combn, m = 2L)
     } else if (type == "between") {
         id_grid <- expand.grid(cell_idx, KEEP.OUT.ATTRS = FALSE)

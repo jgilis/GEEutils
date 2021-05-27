@@ -32,6 +32,15 @@ test_that("Within-group correlations work", {
     expect_error(correlateCells(x, grouping = "subject"))
 })
 
+test_that("Within-group correlations work for single-cell groups", {
+    ## Use new subject for random single cell
+    colData(sce)[sample(ncol(sce), 1), "subject"] <- "ZZZ"
+    cells_per_subject <- table(sce$subject)
+    n_pairs <- sum(vapply(cells_per_subject, choose, numeric(1), k = 2))
+    out <- correlateCells(sce, grouping = "subject", type = "within")
+    expect_equal(nrow(out), n_pairs)
+})
+
 test_that("Between-group correlations work", {
     ## Calculate how many total cell pairs we should get
     n_cells <- combn(table(sce$subject), 2)
