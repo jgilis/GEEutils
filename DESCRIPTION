@@ -1,8 +1,8 @@
 Package: GEEutils
 Type: Package
 Title: Aggregation of utility functions for working with Generalized Estimation Equations
-Date: 2021-03-05
-Version: 0.99.6
+Date: 2021-05-03
+Version: 0.0.3
 Authors@R: c(
     person("Jeroen", "Gilis", role = c("aut","cre"),
                      email = "jeroen.gilis@ugent.be"),
@@ -11,37 +11,18 @@ Authors@R: c(
            comment = c(ORCID = "0000-0001-9144-3701"))
     )
 Description: Aggregation of utility functions for working with Generalized Estimation Equations.
-Depends: R (>= 4.0)
+Depends: R (>= 4.1)
 Imports:
-    scater,
-    ggplot2,
-    fitdistrplus,
-    SummarizedExperiment,
-    stats,
-    gee,
-    gdata,
-    geesmv,
-    sandwich,
-    data.table,
-    purrr,
-    utils,
-    methods,
-    S4Vectors,
-    Matrix
-Suggests:
-    knitr,
-    rmarkdown,
-    testthat,
-    covr,
-    BiocStyle,
-    ExperimentHub,
-    magrittr,
-    dplyr,
+    edgeR,
+    Matrix,
     SingleCellExperiment,
-    geepack,
-    geeM,
+    methods,
+    stats,
+    SummarizedExperiment,
+    sandwich
+Suggests: 
+    testthat (>= 3.0.0),
     scuttle
-VignetteBuilder: knitr
 License: Artistic-2.0
 URL: https://github.com/jgilis/GEEutils
 Encoding: UTF-8
@@ -57,3 +38,4 @@ biocViews:
     SingleCell,
     Transcriptomics,
     MultipleComparison
+Config/testthat/edition: 3
