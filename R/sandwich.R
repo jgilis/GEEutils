@@ -33,6 +33,8 @@
 #' @param fix Logical, whether to fix the covariance matrix to be positive
 #'   semi-definite in case it's not. See [sandwich::vcovCL()] for details.
 #'   Default: `FALSE`. Only relevant for `type = "HC2"` or `"HC3"`.
+#' @param use_T Logical, should a \eqn{t}-test be used to calculate the
+#'   p-values? If `FALSE` (the default), will use a \eqn{z}-test.
 #'
 #' @details
 #' ## Small sample size adjustments
@@ -87,11 +89,12 @@
 #' head(res$table)
 #'
 #' @export
-#' @importFrom stats df.residual p.adjust pnorm
+#' @importFrom stats df.residual p.adjust pnorm pt
 glmSandwichTest <- function(models, subject_id,
                             coef = NULL, contrast = NULL,
                             type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
-                            cadjust = FALSE, fix = FALSE) {
+                            cadjust = FALSE, fix = FALSE,
+                            use_T = FALSE) {
 
     type <- match.arg(type)
 
@@ -117,7 +120,12 @@ glmSandwichTest <- function(models, subject_id,
     se <- sqrt(sandwich_var)
     wald_stats <- effect_size / se
 
-    pvals <- 2 * pnorm(abs(wald_stats), lower.tail = FALSE)
+    if (use_T) {
+        df <- models[[1]]$df.residual # same for all fits
+        pvals <- 2 * pt(abs(wald_stats), df = df, lower.tail = FALSE)
+    } else {
+        pvals <- 2 * pnorm(abs(wald_stats), lower.tail = FALSE)
+    }
     fdr <- p.adjust(pvals, method = "fdr")
 
     gene_names <- names(models)
