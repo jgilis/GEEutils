@@ -121,7 +121,14 @@ glmSandwichTest <- function(models, subject_id,
     wald_stats <- effect_size / se
 
     if (use_T) {
-        df <- models[[1]]$df.residual # same for all fits
+        m <- models[[1]]  # same for all fits
+        if (!is.null(subject_id)) {
+            d <- m$data
+            ## df = K - p
+            df <- nlevels(factor(d[[subject_id]])) - length(m$coefficients)
+        } else {
+            df <- m$df.residual
+        }
         pvals <- 2 * pt(abs(wald_stats), df = df, lower.tail = FALSE)
     } else {
         pvals <- 2 * pnorm(abs(wald_stats), lower.tail = FALSE)
@@ -140,7 +147,8 @@ glmSandwichTest <- function(models, subject_id,
     )
     params <- c(
         subject_id = subject_id,
-        sandwich_out$params
+        sandwich_out$params,
+        use_T = use_T
     )
     ## Return params and table
     list(params = params, table = tab)
