@@ -1,48 +1,85 @@
-# TODO: add option to specify number pairs to consider (sample from all possible pairs)
-# TODO: add `type = "both"` to calculate both types in one go (return as list?)
+# TODO: add plotting function
 #' @importFrom BiocParallel SerialParam
-.correlate_cells <- function(x, grouping = NULL,
-                             type = c("within", "between"),
+.correlate_cells <- function(x, grouping,
+                             n_pairs = NULL,
                              BPPARAM = SerialParam()) {
-    type <- match.arg(type)
     n_cells <- ncol(x)
 
     if (is.null(grouping)) {
-        if (type == "between") {
-            stop(
-                "`type = 'between'` requires `grouping` to be specified",
-                call. = FALSE
-            )
-        }
-        cell_idx <- list(seq_len(n_cells))
-    } else {
-        if (length(grouping) != n_cells) {
-            stop(
-                "`grouping` should have the same length as the number of cells",
-                call. = FALSE
-            )
-        }
-        cell_idx <- split(seq_len(n_cells), grouping, drop = TRUE)
+        ## Assume all cells from single group
+        grouping <- 1
     }
+    cell_idx <- split(seq_len(n_cells), grouping, drop = TRUE)
 
-    pairings <- .get_cell_pairs(cell_idx, type = type)
-    .calculate_cor(x, pairings, BPPARAM = BPPARAM)
+    pairings <- .get_cell_pairs(cell_idx, n_pairs = n_pairs)
+    all_pairs <- rbind(pairings$within, pairings$between)
+
+    out <- .calculate_cor(x, pairings = all_pairs, BPPARAM = BPPARAM)
+    out[["type"]] <- c(
+        rep("within", NROW(pairings$within)),
+        rep("between", NROW(pairings$between))
+    )
+    out
 }
 
 
 #' @importFrom utils combn
 #' @importFrom Matrix t
-.get_cell_pairs <- function(cell_idx, type) {
-    if (type == "within") {
-        ## Omit subjects with just 1 cell; combn() uses seq_len(n) for integer n
-        cell_idx[lengths(cell_idx) == 1] <- NULL
-        out <- lapply(cell_idx, combn, m = 2L)
-    } else if (type == "between") {
+.get_cell_pairs <- function(cell_idx, n_pairs) {
+    within <- .within_pairs(cell_idx, n_pairs = n_pairs)
+    if (length(cell_idx) > 1) {
+        between <- .between_pairs(cell_idx, n_pairs = n_pairs)
+    } else {
+        between <- NULL
+    }
+    list(within = within, between = between)
+}
+
+.within_pairs <- function(cell_idx, n_pairs) {
+    ## Omit subjects with just 1 cell; combn() uses seq_len(n) for integer n
+    cell_idx[lengths(cell_idx) == 1] <- NULL
+    out <- lapply(cell_idx, combn, m = 2L)
+
+    ## Output: 2-column matrix of cell ID pairs
+    out <- t(do.call("cbind", out))
+    out <- unique(out) # remove any redundancies
+
+    if (!is.null(n_pairs)) {
+        if (n_pairs > nrow(out)) {
+            warning(
+                "`n_pairs` greater than max. possible within-group pairs.",
+                "\n  Will use all pairs (n = ", nrow(out), ")."
+            )
+        } else {
+            out <- out[sample(nrow(out), size = n_pairs), ]
+        }
+    }
+    out
+}
+
+.between_pairs <- function(cell_idx, n_pairs) {
+    if (is.null(n_pairs)) {
+        ## Use all possible between-group pairs
         id_grid <- expand.grid(cell_idx, KEEP.OUT.ATTRS = FALSE)
         out <- apply(as.matrix(id_grid), 1, combn, m = 2L, simplify = FALSE)
     } else {
-        stop("Invalid `type` argument.", call. = FALSE)
+        ## Use sampling strategy to avoid computing all possible pairs
+        groups <- names(cell_idx)
+        group_pairs <- t(combn(groups, 2))
+
+        ## Sample a number of cells per group-pair such that we get n_pairs total
+        cells_per_pair <- round(n_pairs / nrow(group_pairs))
+
+        out <- apply(group_pairs, 1, function(g) {
+            g1 <- g[[1]]
+            g2 <- g[[2]]
+            rbind(
+                sample(cell_idx[[g1]], size = cells_per_pair, replace = TRUE),
+                sample(cell_idx[[g2]], size = cells_per_pair, replace = TRUE)
+            )
+        }, simplify = FALSE)
     }
+
     ## Output: 2-column matrix of cell ID pairs
     out <- t(do.call("cbind", out))
     unique(out) # remove any redundancies
