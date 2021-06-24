@@ -1,4 +1,5 @@
-# TODO: add plotting function
+# TODO: add documentation
+
 #' @importFrom BiocParallel SerialParam
 .correlate_cells <- function(x, grouping,
                              n_pairs = NULL,
@@ -94,7 +95,6 @@
 }
 
 
-## S4 stuff
 setGeneric("correlateCells", function(x, ...) standardGeneric("correlateCells"))
 
 setMethod("correlateCells", "ANY", .correlate_cells)
@@ -107,3 +107,38 @@ setMethod("correlateCells", "SummarizedExperiment",
         .correlate_cells(assay(x, use_assay), grouping = grouping, ...)
     }
 )
+
+
+
+# Plotting ----------------------------------------------------------------
+
+#' @importFrom ggplot2 ggplot aes geom_boxplot geom_point position_jitter
+.plot_correlations <- function(x, point_size = 0.5) {
+    df <- as.data.frame(x)
+    type <- rho <- NULL
+    ggplot(df, aes(x = type, y = rho)) +
+        geom_boxplot(aes(fill = type), outlier.size = -1, alpha = 0.5) +
+        geom_point(size = point_size, position = position_jitter(width = 0.2))
+}
+
+
+#' @rdname correlateCells
+#' @aliases plotCorrelations
+#' @export
+setGeneric("plotCorrelations", function(x, ...) standardGeneric("plotCorrelations"))
+
+## If DataFrame is given, assume this is the output from correlateCells()
+#' @rdname correlateCells
+#' @aliases plotCorrelations
+#' @export
+setMethod("plotCorrelations", "DataFrame", .plot_correlations)
+
+## If SummarizedExperiment given, first run correlateCells() before plotting
+#' @rdname correlateCells
+#' @aliases plotCorrelations
+#' @export
+setMethod("plotCorrelations", "SummarizedExperiment",
+          function(x, ..., point_size = 0.5) {
+              corr <- correlateCells(x, ...)
+              plotCorrelations(corr, point_size = point_size)
+          }

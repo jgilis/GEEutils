@@ -22,7 +22,8 @@ Imports:
     sandwich,
     utils,
     scran,
-    BiocParallel
+    BiocParallel,
+    ggplot2
 Suggests: 
     testthat (>= 3.0.0),
     scuttle
