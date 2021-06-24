@@ -11,7 +11,8 @@ glmSandwichTest(
   contrast = NULL,
   type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
   cadjust = FALSE,
-  fix = FALSE
+  fix = FALSE,
+  use_T = FALSE
 )
 }
 \arguments{
@@ -46,6 +47,9 @@ Default: \code{TRUE}. When using \code{type = "LiRedden"}, this will be set to
 \item{fix}{Logical, whether to fix the covariance matrix to be positive
 semi-definite in case it's not. See \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} for details.
 Default: \code{FALSE}. Only relevant for \code{type = "HC2"} or \code{"HC3"}.}
+
+\item{use_T}{Logical, should a \eqn{t}-test be used to calculate the
+p-values? If \code{FALSE} (the default), will use a \eqn{z}-test.}
 }
 \value{
 A \code{data.frame} with a row for each gene and the following columns:
