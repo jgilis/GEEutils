@@ -151,7 +151,7 @@ NULL
                 "\n  Will use all pairs (n = ", nrow(out), ")."
             )
         } else {
-            out <- out[sample(nrow(out), size = n_pairs), ]
+            out <- out[sample(nrow(out), size = n_pairs), , drop = FALSE]
         }
     }
     out
@@ -166,6 +166,12 @@ NULL
         ## Use sampling strategy to avoid computing all possible pairs
         groups <- names(cell_idx)
         group_pairs <- t(combn(groups, 2))
+
+        if (n_pairs < nrow(group_pairs)) {
+            ## So that cells_per_pair does not become 0 in next step
+            sub_pairs <- sample(nrow(group_pairs), n_pairs)
+            group_pairs <- group_pairs[sub_pairs, , drop = FALSE]
+        }
 
         ## Sample cells per group-pair such that we get n_pairs total
         cells_per_pair <- round(n_pairs / nrow(group_pairs))

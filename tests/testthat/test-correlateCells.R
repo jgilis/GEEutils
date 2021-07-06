@@ -46,10 +46,20 @@ test_that("Within-group correlations work for single-cell groups", {
 
 test_that("Subsetting cell pairs works", {
     n_pairs <- 10
-    out <- correlateCells(sce, grouping = "subject", n_pairs = 10)
+    out <- correlateCells(sce, grouping = "subject", n_pairs = n_pairs)
     expect_named(out, c("cell1", "cell2", "rho", "p.value", "FDR", "type"))
     ## Note: only the within-pairs will be exactly equal to n_pairs,
     ## for the between-pairs some deviation is possible due to the sampling
     ## strategy
     expect_equal(nrow(subset(out, type == "within")), n_pairs)
+})
+
+## Avoid bug in .between_pairs when calculating cells_per_pair
+test_that("Between-group pairs selection works for n_pairs < group_pairs", {
+    ## Test data has 3 groups, so 3 group pairs
+    ## (n_pairs = 2 will always work because of the rounding in .between_pairs)
+    n_pairs <- 1
+    out <- correlateCells(sce, grouping = "subject", n_pairs = n_pairs)
+    expect_equal(nrow(out), 2)
+    expect_equal(out$type, c("within", "between"))
 })
