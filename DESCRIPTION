@@ -1,8 +1,8 @@
 Package: GEEutils
 Type: Package
 Title: Aggregation of utility functions for working with Generalized Estimation Equations
-Date: 2021-06-24
-Version: 0.0.4
+Date: 2021-07-06
+Version: 0.0.5
 Authors@R: c(
     person("Jeroen", "Gilis", role = c("aut","cre"),
                      email = "jeroen.gilis@ugent.be"),
