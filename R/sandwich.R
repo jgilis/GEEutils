@@ -1,5 +1,4 @@
 # TODO: add some more details regarding "clustered covariance matrices" and within-subject correlation
-# TODO: replace example with more sensible case
 
 #' GLM Wald tests using sandwich estimators
 #'
@@ -72,18 +71,23 @@
 #' @examples
 #' ## Mock up data set
 #' library(scuttle)
-#' sce <- mockSCE(ncells = 100, ngenes = 500)
+#' sce <- mockSCE(ncells = 1000, ngenes = 500)
+#'
+#' ## Simulate 8 samples in two treatment groups, using an unpaired design
+#' sce$Subjects <- gl(8, 125)
+#' sce$Treatment <- gl(2, 4)[sce$Subjects]
+#'
 #' colData(sce)
 #'
 #' ## Fit model using available colData columns
-#' model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
+#' model_fits <- fitGLM(sce, formula = ~Treatment)
 #'
 #' ## Test for Treatment effect using a clustered sandwich estimator with
 #' ## Li-Redden adjustment
 #' res <- glmSandwichTest(
 #'     model_fits,
-#'     coef = "Treatmenttreat2",
-#'     subject_id = "Cell_Cycle",
+#'     coef = 2,
+#'     subject_id = "Subjects",
 #'     type = "LiRedden"
 #' )
 #' head(res$table)
