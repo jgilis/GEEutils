@@ -100,7 +100,8 @@ res <- glmSandwichTest(
     model_fits,
     coef = 2,
     subject_id = "Subjects",
-    type = "LiRedden"
+    type = "LiRedden",
+    use_T = TRUE  # use Wald t-tests
 )
 head(res$table)
 
