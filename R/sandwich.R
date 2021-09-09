@@ -383,7 +383,7 @@ glmSandwichTest <- function(models, subject_id,
 }
 
 .is_within_var <- function(var, .data, subject_id) {
-    any(rowSums(table(.data[[subject_id]], .data[[var]]) > 1) > 1)
+    any(rowSums(table(.data[[subject_id]], .data[[var]]) > 0) > 1)
 }
 
 .get_within_vars <- function(vars, .data, subject_id) {
