@@ -1,5 +1,5 @@
 # TODO: add some more details regarding "clustered covariance matrices" and within-subject correlation
-# TODO: replace example with more sensible case
+# FIXME: shouldn't this function always fail when number of parameters is lower than number of subjects?
 
 #' GLM Wald tests using sandwich estimators
 #'
@@ -72,19 +72,25 @@
 #' @examples
 #' ## Mock up data set
 #' library(scuttle)
-#' sce <- mockSCE(ncells = 100, ngenes = 500)
+#' sce <- mockSCE(ncells = 1000, ngenes = 500)
+#'
+#' ## Simulate 8 samples in two treatment groups, using an unpaired design
+#' sce$Subjects <- gl(8, 125)
+#' sce$Treatment <- gl(2, 4)[sce$Subjects]
+#'
 #' colData(sce)
 #'
 #' ## Fit model using available colData columns
-#' model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
+#' model_fits <- fitGLM(sce, formula = ~Treatment)
 #'
 #' ## Test for Treatment effect using a clustered sandwich estimator with
 #' ## Li-Redden adjustment
 #' res <- glmSandwichTest(
 #'     model_fits,
-#'     coef = "Treatmenttreat2",
-#'     subject_id = "Cell_Cycle",
-#'     type = "LiRedden"
+#'     coef = 2,
+#'     subject_id = "Subjects",
+#'     type = "LiRedden",
+#'     use_T = TRUE  # use Wald t-tests
 #' )
 #' head(res$table)
 #'
@@ -99,8 +105,19 @@ glmSandwichTest <- function(models, subject_id,
     type <- match.arg(type)
 
     ## If single model supplied, create list internally
-    if (is(models, "glm")) {
+    if (!is(models, "list")) {
+        if (!is(models, "glm")) {
+            stop(
+                "`models` should be a single 'glm' or a list of 'glm' objects.",
+                call. = FALSE
+            )
+        }
         models <- list(models)
+    }
+
+    d <- models[[1]]$data
+    if (!is.null(subject_id) && !(subject_id %in% colnames(d))) {
+        stop(sprintf("subject_id = '%s' not found.", subject_id), call. = FALSE)
     }
 
     coefficients <- .get_coefs(models = models)
@@ -123,9 +140,7 @@ glmSandwichTest <- function(models, subject_id,
     if (use_T) {
         m <- models[[1]]  # same for all fits
         if (!is.null(subject_id)) {
-            d <- m$data
-            ## df = K - p
-            df <- nlevels(factor(d[[subject_id]])) - length(m$coefficients)
+            df <- .get_between_subject_df(m, subject_id = subject_id)
         } else {
             df <- m$df.residual
         }
@@ -150,6 +165,8 @@ glmSandwichTest <- function(models, subject_id,
         sandwich_out$params,
         use_T = use_T
     )
+    if (use_T) params$df <- df
+
     ## Return params and table
     list(params = params, table = tab)
 }
@@ -292,7 +309,10 @@ glmSandwichTest <- function(models, subject_id,
         )
     }
     K <- nlevels(factor(d[[subject_id]]))
-    p <- length(m$coefficients)
+
+    ## Do not count within-subject params
+    n_within <- .count_within_params(m, subject_id = subject_id)
+    p <- length(m$coefficients) - n_within
 
     if (K <= p) {
         warning(
@@ -309,4 +329,66 @@ glmSandwichTest <- function(models, subject_id,
         out <- K / (K - p)
     }
     list(out = out, type = type)
+}
+
+
+## Helpers to compute the between-subject degrees of freedom
+.get_between_subject_df <- function(m, subject_id) {
+    d <- m$data
+
+    ## df = nr. of subjects - nr. of between-subject parameters
+    K <- length(unique(d[[subject_id]]))
+    p <- length(m$coefficients)
+    n_within_params <- .count_within_params(m, subject_id = subject_id)
+    df <- K - (p - n_within_params)
+
+    if (df <= 0) {
+        stop("Non-positive degrees of freedom.\n",
+            "Too many between-subject parameters (", p - n_within_params, ") ",
+            "for number of subjects (", K, ").",
+            call. = FALSE
+        )
+    }
+
+    df
+}
+
+#' @importFrom stats formula
+.count_within_params <- function(m, subject_id) {
+    ## Get variables from model formula
+    ff <- formula(m)
+    all_vars <- all.vars(ff)
+
+    ## Remove 'y' and 'offsets' variables
+    ## Don't need to consider those
+    all_vars <- all_vars[!(all_vars %in% c("y", "offsets"))]
+
+    ## Check which are within-variables
+    within_vars <- .get_within_vars(
+        all_vars,
+        .data = m$data, subject_id = subject_id
+    )
+
+    if (!length(within_vars)) {
+        return(0)
+    }
+
+    ## Count parameters in which the within_vars appear, also the interactions
+    ## These would all be considered within-subject variables
+    coefs <- names(m$coefficients)
+
+    occurrences <- vapply(within_vars, grepl, logical(length(coefs)), x = coefs)
+    occurrences <- apply(occurrences, 1, any)  # avoid double counting
+    sum(occurrences)
+}
+
+.is_within_var <- function(var, .data, subject_id) {
+    any(rowSums(table(.data[[subject_id]], .data[[var]]) > 0) > 1)
+}
+
+.get_within_vars <- function(vars, .data, subject_id) {
+    is_within <- vapply(vars, .is_within_var, logical(1),
+        .data = .data, subject_id = subject_id
+    )
+    vars[is_within]
 }
