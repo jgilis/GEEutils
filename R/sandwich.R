@@ -105,7 +105,13 @@ glmSandwichTest <- function(models, subject_id,
     type <- match.arg(type)
 
     ## If single model supplied, create list internally
-    if (inherits(models, "lm")) {
+    if (!is(models, "list")) {
+        if (!is(models, "glm")) {
+            stop(
+                "`models` should be a single 'glm' or a list of 'glm' objects.",
+                call. = FALSE
+            )
+        }
         models <- list(models)
     }
 
