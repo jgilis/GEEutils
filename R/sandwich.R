@@ -105,8 +105,13 @@ glmSandwichTest <- function(models, subject_id,
     type <- match.arg(type)
 
     ## If single model supplied, create list internally
-    if (is(models, "glm")) {
+    if (inherits(models, "lm")) {
         models <- list(models)
+    }
+
+    d <- models[[1]]$data
+    if (!is.null(subject_id) && !(subject_id %in% colnames(d))) {
+        stop(sprintf("subject_id = '%s' not found.", subject_id), call. = FALSE)
     }
 
     coefficients <- .get_coefs(models = models)
