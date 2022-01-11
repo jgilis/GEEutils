@@ -1,5 +1,5 @@
 # TODO: add some more details regarding "clustered covariance matrices" and within-subject correlation
-# TODO: replace example with more sensible case
+# FIXME: shouldn't this function always fail when number of parameters is lower than number of subjects?
 
 #' GLM Wald tests using sandwich estimators
 #'
@@ -18,21 +18,17 @@
 #'   original data indicating subject IDs. When this is specified, observations
 #'   are considered to be correlated within each subject and
 #'   [sandwich::vcovCL()] is used to estimate the covariance matrix. When
-#'   `subject_id = NULL` (the default), a heteroskedastic-consistent sandwich
+#'   `subject_id = NULL`, a heteroskedastic-consistent sandwich
 #'   estimator is used (equivalent to [sandwich::vcovHC()]).
 #' @param type Character string specifying which type of small-sample bias
 #'   adjustment to be applied. Possible values are `"HC0"` to `"HC3"` or
 #'   `"LiRedden"`. For details on the `"HC*"` adjustments see
 #'   [sandwich::vcovCL()], for `"LiRedden"` see "Details" below. The default is
 #'   to use `"LiRedden"`.
-#' @param cadjust Logical, whether to apply cluster bias adjustment. Where
-#'   "cluster" refers to the subject-level grouping of the observations. Only
-#'   relevant if `subject_id` is provided. See [sandwich::vcovCL()] for details.
-#'   Default: `TRUE`. When using `type = "LiRedden"`, this will be set to
-#'   `FALSE` internally.
-#' @param fix Logical, whether to fix the covariance matrix to be positive
-#'   semi-definite in case it's not. See [sandwich::vcovCL()] for details.
-#'   Default: `FALSE`. Only relevant for `type = "HC2"` or `"HC3"`.
+#' @param use_T Logical, should a \eqn{t}-test be used to calculate the
+#'   p-values? If `FALSE` (the default), will use a \eqn{z}-test.
+#'
+#' @param ... Further arguments passed on to [sandwich::vcovCL()].
 #'
 #' @details
 #' ## Small sample size adjustments
@@ -70,34 +66,52 @@
 #' @examples
 #' ## Mock up data set
 #' library(scuttle)
-#' sce <- mockSCE(ncells = 100, ngenes = 500)
+#' sce <- mockSCE(ncells = 1000, ngenes = 500)
+#'
+#' ## Simulate 8 samples in two treatment groups, using an unpaired design
+#' sce$Subjects <- gl(8, 125)
+#' sce$Treatment <- gl(2, 4)[sce$Subjects]
+#'
 #' colData(sce)
 #'
 #' ## Fit model using available colData columns
-#' model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
+#' model_fits <- fitGLM(sce, formula = ~Treatment)
 #'
 #' ## Test for Treatment effect using a clustered sandwich estimator with
 #' ## Li-Redden adjustment
 #' res <- glmSandwichTest(
 #'     model_fits,
-#'     coef = "Treatmenttreat2",
-#'     subject_id = "Cell_Cycle",
-#'     type = "LiRedden"
+#'     coef = 2,
+#'     subject_id = "Subjects",
+#'     type = "LiRedden",
+#'     use_T = TRUE  # use Wald t-tests
 #' )
 #' head(res$table)
 #'
 #' @export
-#' @importFrom stats df.residual p.adjust pnorm
+#' @importFrom stats df.residual p.adjust pnorm pt
 glmSandwichTest <- function(models, subject_id,
                             coef = NULL, contrast = NULL,
                             type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
-                            cadjust = FALSE, fix = FALSE) {
+                            use_T = FALSE,
+                            ...) {
 
     type <- match.arg(type)
 
     ## If single model supplied, create list internally
-    if (is(models, "glm")) {
+    if (!is(models, "list")) {
+        if (!is(models, "glm")) {
+            stop(
+                "`models` should be a single 'glm' or a list of 'glm' objects.",
+                call. = FALSE
+            )
+        }
         models <- list(models)
+    }
+
+    d <- models[[1]]$data
+    if (!is.null(subject_id) && !(subject_id %in% colnames(d))) {
+        stop(sprintf("subject_id = '%s' not found.", subject_id), call. = FALSE)
     }
 
     coefficients <- .get_coefs(models = models)
@@ -110,14 +124,24 @@ glmSandwichTest <- function(models, subject_id,
 
     sandwich_out <- .get_beta_vars(
         models = models, coef = coef, contrast = contrast,
-        subject_id = subject_id, type = type, cadjust = cadjust, fix = fix
+        subject_id = subject_id, type = type, ...
     )
     sandwich_var <- sandwich_out$beta_vars
 
     se <- sqrt(sandwich_var)
     wald_stats <- effect_size / se
 
-    pvals <- 2 * pnorm(abs(wald_stats), lower.tail = FALSE)
+    if (use_T) {
+        m <- models[[1]]  # same for all fits
+        if (!is.null(subject_id)) {
+            df <- .get_between_subject_df(m, subject_id = subject_id)
+        } else {
+            df <- m$df.residual
+        }
+        pvals <- 2 * pt(abs(wald_stats), df = df, lower.tail = FALSE)
+    } else {
+        pvals <- 2 * pnorm(abs(wald_stats), lower.tail = FALSE)
+    }
     fdr <- p.adjust(pvals, method = "fdr")
 
     gene_names <- names(models)
@@ -132,8 +156,11 @@ glmSandwichTest <- function(models, subject_id,
     )
     params <- c(
         subject_id = subject_id,
-        sandwich_out$params
+        sandwich_out$params,
+        use_T = use_T
     )
+    if (use_T) params$df <- df
+
     ## Return params and table
     list(params = params, table = tab)
 }
@@ -208,7 +235,7 @@ glmSandwichTest <- function(models, subject_id,
 }
 
 
-.get_beta_vars <- function(models, coef, contrast, subject_id, type, cadjust, fix) {
+.get_beta_vars <- function(models, coef, contrast, subject_id, type, ...) {
     adjust_LR <- FALSE
     if (type == "LiRedden") {
         type <- "HC0"
@@ -218,7 +245,6 @@ glmSandwichTest <- function(models, subject_id,
                 '\nFalling back to `type = "HC0"` without further adjustment.'
             )
         } else {
-            cadjust <- fix <- FALSE
             adjust_LR <- TRUE
             lr_adjustment <- .LR_adjustment(models[[1]], subject_id = subject_id)
         }
@@ -232,7 +258,7 @@ glmSandwichTest <- function(models, subject_id,
     beta_vars <- vapply(models, FUN = .glm_sandwich_var,
         contrast = contrast, coef = coef,
         subject_id = subject_id, type = type,
-        cadjust = cadjust, fix = fix,
+        ...,
         FUN.VALUE = numeric(1)  # expects just one coefficient or contrast!
     )
 
@@ -243,7 +269,7 @@ glmSandwichTest <- function(models, subject_id,
 
     list(
         beta_vars = beta_vars,
-        params = list(type = type, cadjust = cadjust, fix = fix)
+        params = list(type = type)
     )
 }
 
@@ -251,10 +277,10 @@ glmSandwichTest <- function(models, subject_id,
 ## Helper to compute sandwich variances of coefficient estimates for single model
 ## Returns diagonal elements of the covariance matrix V(beta)
 #' @importFrom sandwich vcovCL
-.glm_sandwich_var <- function(m, coef, contrast, subject_id, type, cadjust, fix) {
+.glm_sandwich_var <- function(m, coef, contrast, subject_id, type, ...) {
     v <- vcovCL(m,
         cluster = subject_id, sandwich = TRUE, type = type,
-        cadjust = cadjust, fix = fix
+        ...
     )
     if (!is.null(contrast)) {
         v <- crossprod(contrast, v %*% contrast)
@@ -276,7 +302,10 @@ glmSandwichTest <- function(models, subject_id,
         )
     }
     K <- nlevels(factor(d[[subject_id]]))
-    p <- length(m$coefficients)
+
+    ## Do not count within-subject params
+    n_within <- .count_within_params(m, subject_id = subject_id)
+    p <- length(m$coefficients) - n_within
 
     if (K <= p) {
         warning(
@@ -293,4 +322,66 @@ glmSandwichTest <- function(models, subject_id,
         out <- K / (K - p)
     }
     list(out = out, type = type)
+}
+
+
+## Helpers to compute the between-subject degrees of freedom
+.get_between_subject_df <- function(m, subject_id) {
+    d <- m$data
+
+    ## df = nr. of subjects - nr. of between-subject parameters
+    K <- length(unique(d[[subject_id]]))
+    p <- length(m$coefficients)
+    n_within_params <- .count_within_params(m, subject_id = subject_id)
+    df <- K - (p - n_within_params)
+
+    if (df <= 0) {
+        stop("Non-positive degrees of freedom.\n",
+            "Too many between-subject parameters (", p - n_within_params, ") ",
+            "for number of subjects (", K, ").",
+            call. = FALSE
+        )
+    }
+
+    df
+}
+
+#' @importFrom stats formula
+.count_within_params <- function(m, subject_id) {
+    ## Get variables from model formula
+    ff <- formula(m)
+    all_vars <- all.vars(ff)
+
+    ## Remove 'y' and 'offsets' variables
+    ## Don't need to consider those
+    all_vars <- all_vars[!(all_vars %in% c("y", "offsets"))]
+
+    ## Check which are within-variables
+    within_vars <- .get_within_vars(
+        all_vars,
+        .data = m$data, subject_id = subject_id
+    )
+
+    if (!length(within_vars)) {
+        return(0)
+    }
+
+    ## Count parameters in which the within_vars appear, also the interactions
+    ## These would all be considered within-subject variables
+    coefs <- names(m$coefficients)
+
+    occurrences <- vapply(within_vars, grepl, logical(length(coefs)), x = coefs)
+    occurrences <- apply(occurrences, 1, any)  # avoid double counting
+    sum(occurrences)
+}
+
+.is_within_var <- function(var, .data, subject_id) {
+    any(rowSums(table(.data[[subject_id]], .data[[var]]) > 0) > 1)
+}
+
+.get_within_vars <- function(vars, .data, subject_id) {
+    is_within <- vapply(vars, .is_within_var, logical(1),
+        .data = .data, subject_id = subject_id
+    )
+    vars[is_within]
 }

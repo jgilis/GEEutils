@@ -10,8 +10,8 @@ glmSandwichTest(
   coef = NULL,
   contrast = NULL,
   type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
-  cadjust = FALSE,
-  fix = FALSE
+  use_T = FALSE,
+  ...
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ glmSandwichTest(
 original data indicating subject IDs. When this is specified, observations
 are considered to be correlated within each subject and
 \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} is used to estimate the covariance matrix. When
-\code{subject_id = NULL} (the default), a heteroskedastic-consistent sandwich
+\code{subject_id = NULL}, a heteroskedastic-consistent sandwich
 estimator is used (equivalent to \code{\link[sandwich:vcovHC]{sandwich::vcovHC()}}).}
 
 \item{coef}{Character string or numeric scalar specifying the coefficient to
@@ -37,15 +37,10 @@ adjustment to be applied. Possible values are \code{"HC0"} to \code{"HC3"} or
 \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}}, for \code{"LiRedden"} see "Details" below. The default is
 to use \code{"LiRedden"}.}
 
-\item{cadjust}{Logical, whether to apply cluster bias adjustment. Where
-"cluster" refers to the subject-level grouping of the observations. Only
-relevant if \code{subject_id} is provided. See \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} for details.
-Default: \code{TRUE}. When using \code{type = "LiRedden"}, this will be set to
-\code{FALSE} internally.}
+\item{use_T}{Logical, should a \eqn{t}-test be used to calculate the
+p-values? If \code{FALSE} (the default), will use a \eqn{z}-test.}
 
-\item{fix}{Logical, whether to fix the covariance matrix to be positive
-semi-definite in case it's not. See \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} for details.
-Default: \code{FALSE}. Only relevant for \code{type = "HC2"} or \code{"HC3"}.}
+\item{...}{Further arguments passed on to \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}}.}
 }
 \value{
 A \code{data.frame} with a row for each gene and the following columns:
@@ -79,19 +74,25 @@ multiplied with \eqn{K/(K-p)}, where \eqn{K} is the number of subjects and
 \examples{
 ## Mock up data set
 library(scuttle)
-sce <- mockSCE(ncells = 100, ngenes = 500)
+sce <- mockSCE(ncells = 1000, ngenes = 500)
+
+## Simulate 8 samples in two treatment groups, using an unpaired design
+sce$Subjects <- gl(8, 125)
+sce$Treatment <- gl(2, 4)[sce$Subjects]
+
 colData(sce)
 
 ## Fit model using available colData columns
-model_fits <- fitGLM(sce, ~ Mutation_Status + Treatment)
+model_fits <- fitGLM(sce, formula = ~Treatment)
 
 ## Test for Treatment effect using a clustered sandwich estimator with
 ## Li-Redden adjustment
 res <- glmSandwichTest(
     model_fits,
-    coef = "Treatmenttreat2",
-    subject_id = "Cell_Cycle",
-    type = "LiRedden"
+    coef = 2,
+    subject_id = "Subjects",
+    type = "LiRedden",
+    use_T = TRUE  # use Wald t-tests
 )
 head(res$table)
 
