@@ -7,11 +7,13 @@
 #' @param formula An object of class ["formula"][stats::formula] or a character
 #'   string that can be coerced to one. Entries in the formula should refer to
 #'   columns in `colData(sce)`.
-#' @param family Character string specifying the distribution to be used for
-#'   the GLM. Currently supports `"poisson"` and `"quasipoisson"`.
+#' @param family Character string specifying the distribution to be used for the
+#'   GLM. Currently supports `"poisson"`, `"quasipoisson"` and `"negbin"`
+#'   (negative binomial GLM, through [MASS::glm.nb()]).
 #' @param offsets Either a character string specifying which method to use to
 #'   calculate offsets or a numeric vector providing the offsets.
-#' @param ... Further arguments passed on to [stats::glm()].
+#' @param ... Further arguments passed on to [stats::glm()] or [MASS::glm.nb()]
+#'   when `family = "negbin"`.
 #'
 #' @details
 #' The `offsets` are calculated using [edgeR::calcNormFactors()] by default
@@ -36,7 +38,7 @@
 #' @importFrom SingleCellExperiment counts
 #' @importFrom stats as.formula
 fitGLM <- function(sce, formula,
-                   family = c("poisson", "quasipoisson"),
+                   family = c("poisson", "quasipoisson", "negbin"),
                    offsets = "TMM",
                    ...) {
 
@@ -67,6 +69,7 @@ fitGLM <- function(sce, formula,
 
 ## Helper to fit single GLM from count vector and formula
 #' @importFrom stats glm
+#' @importFrom MASS glm.nb
 .fit_glm <- function(y, offsets, formula, family, cd, ...) {
     ## Make formula of the form "y ~ ..." and include offsets
     cd$offsets <- offsets
@@ -75,7 +78,15 @@ fitGLM <- function(sce, formula,
         paste("y", paste(formula, collapse = " "), "+ offset(offsets)")
     )
 
-    glm(formula = formula, family = family, data = cd, ...)
+    if (identical(family, "negbin")) {
+        ## Suppress partial argument match warnings
+        suppressWarnings({
+            out <- glm.nb(formula = formula, data = cd, ...)
+        })
+    } else {
+        out <- glm(formula = formula, family = family, data = cd, ...)
+    }
+    out
 }
 
 

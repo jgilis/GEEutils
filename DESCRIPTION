@@ -23,7 +23,8 @@ Imports:
     utils,
     scran,
     BiocParallel,
-    ggplot2
+    ggplot2,
+    MASS
 Suggests:
     testthat (>= 3.0.0),
     scuttle
