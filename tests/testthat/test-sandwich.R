@@ -147,3 +147,22 @@ test_that("Sandwich t-test handles within-subject interaction effects", {
     ## df should still be 6
     expect_identical(pars$df, 6L)
 })
+
+
+# NB GLM ------------------------------------------------------------------
+
+nb_fits <- fitGLM(
+    sce, ~ Mutation_Status * Cell_Cycle + Treatment,
+    family = "negbin"
+)
+test_that("glmSandwichTest works with NB GLM fits", {
+    out <- glmSandwichTest(model_fits5,
+        subject_id = "subject_id",
+        type = "LiRedden",
+        coef = "Treatment2", use_T = TRUE
+    )
+
+    pars <- out$params
+    expect_true(pars$use_T)
+    expect_identical(pars$df, 6L)
+})

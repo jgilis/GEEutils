@@ -7,7 +7,7 @@
 fitGLM(
   sce,
   formula,
-  family = c("poisson", "quasipoisson"),
+  family = c("poisson", "quasipoisson", "negbin"),
   offsets = "TMM",
   ...
 )
@@ -19,13 +19,15 @@ fitGLM(
 string that can be coerced to one. Entries in the formula should refer to
 columns in \code{colData(sce)}.}
 
-\item{family}{Character string specifying the distribution to be used for
-the GLM. Currently supports \code{"poisson"} and \code{"quasipoisson"}.}
+\item{family}{Character string specifying the distribution to be used for the
+GLM. Currently supports \code{"poisson"}, \code{"quasipoisson"} and \code{"negbin"}
+(negative binomial GLM, through \code{\link[MASS:glm.nb]{MASS::glm.nb()}}).}
 
 \item{offsets}{Either a character string specifying which method to use to
 calculate offsets or a numeric vector providing the offsets.}
 
-\item{...}{Further arguments passed on to \code{\link[stats:glm]{stats::glm()}}.}
+\item{...}{Further arguments passed on to \code{\link[stats:glm]{stats::glm()}} or \code{\link[MASS:glm.nb]{MASS::glm.nb()}}
+when \code{family = "negbin"}.}
 }
 \value{
 A list of \code{"glm"} objects for each gene.

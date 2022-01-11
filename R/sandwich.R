@@ -109,9 +109,11 @@ glmSandwichTest <- function(models, subject_id,
         models <- list(models)
     }
 
-    d <- models[[1]]$data
-    if (!is.null(subject_id) && !(subject_id %in% colnames(d))) {
-        stop(sprintf("subject_id = '%s' not found.", subject_id), call. = FALSE)
+    ## Expected to be the same for all model fits
+    if (is.null(subject_id)) {
+        mf <- NULL
+    } else {
+        mf <- expand.model.frame(models[[1]], extras = subject_id)
     }
 
     coefficients <- .get_coefs(models = models)
@@ -124,7 +126,7 @@ glmSandwichTest <- function(models, subject_id,
 
     sandwich_out <- .get_beta_vars(
         models = models, coef = coef, contrast = contrast,
-        subject_id = subject_id, type = type, ...
+        mf = mf, subject_id = subject_id, type = type, ...
     )
     sandwich_var <- sandwich_out$beta_vars
 
@@ -134,7 +136,7 @@ glmSandwichTest <- function(models, subject_id,
     if (use_T) {
         m <- models[[1]]  # same for all fits
         if (!is.null(subject_id)) {
-            df <- .get_between_subject_df(m, subject_id = subject_id)
+            df <- .get_between_subject_df(m, mf = mf, subject_id = subject_id)
         } else {
             df <- m$df.residual
         }
@@ -235,7 +237,7 @@ glmSandwichTest <- function(models, subject_id,
 }
 
 
-.get_beta_vars <- function(models, coef, contrast, subject_id, type, ...) {
+.get_beta_vars <- function(models, coef, contrast, mf, subject_id, type, ...) {
     adjust_LR <- FALSE
     if (type == "LiRedden") {
         type <- "HC0"
@@ -246,7 +248,9 @@ glmSandwichTest <- function(models, subject_id,
             )
         } else {
             adjust_LR <- TRUE
-            lr_adjustment <- .LR_adjustment(models[[1]], subject_id = subject_id)
+            lr_adjustment <- .LR_adjustment(models[[1]],
+                mf = mf, subject_id = subject_id
+            )
         }
     }
 
@@ -278,10 +282,7 @@ glmSandwichTest <- function(models, subject_id,
 ## Returns diagonal elements of the covariance matrix V(beta)
 #' @importFrom sandwich vcovCL
 .glm_sandwich_var <- function(m, coef, contrast, subject_id, type, ...) {
-    v <- vcovCL(m,
-        cluster = subject_id, sandwich = TRUE, type = type,
-        ...
-    )
+    v <- vcovCL(m, cluster = subject_id, sandwich = TRUE, type = type, ...)
     if (!is.null(contrast)) {
         v <- crossprod(contrast, v %*% contrast)
         return(diag(v))
@@ -293,18 +294,11 @@ glmSandwichTest <- function(models, subject_id,
 }
 
 
-.LR_adjustment <- function(m, subject_id) {
-    d <- m$data
-    if (!(subject_id %in% names(d))) {
-        stop(
-            "`subject_id` '", subject_id, "' not found in fit data.",
-            call. = FALSE
-        )
-    }
-    K <- nlevels(factor(d[[subject_id]]))
+.LR_adjustment <- function(m, mf, subject_id) {
+    K <- length(unique(mf[[subject_id]]))
 
     ## Do not count within-subject params
-    n_within <- .count_within_params(m, subject_id = subject_id)
+    n_within <- .count_within_params(m, mf = mf, subject_id = subject_id)
     p <- length(m$coefficients) - n_within
 
     if (K <= p) {
@@ -326,13 +320,11 @@ glmSandwichTest <- function(models, subject_id,
 
 
 ## Helpers to compute the between-subject degrees of freedom
-.get_between_subject_df <- function(m, subject_id) {
-    d <- m$data
-
+.get_between_subject_df <- function(m, mf, subject_id) {
     ## df = nr. of subjects - nr. of between-subject parameters
-    K <- length(unique(d[[subject_id]]))
+    K <- length(unique(mf[[subject_id]]))
     p <- length(m$coefficients)
-    n_within_params <- .count_within_params(m, subject_id = subject_id)
+    n_within_params <- .count_within_params(m, mf, subject_id = subject_id)
     df <- K - (p - n_within_params)
 
     if (df <= 0) {
@@ -347,7 +339,7 @@ glmSandwichTest <- function(models, subject_id,
 }
 
 #' @importFrom stats formula
-.count_within_params <- function(m, subject_id) {
+.count_within_params <- function(m, mf, subject_id) {
     ## Get variables from model formula
     ff <- formula(m)
     all_vars <- all.vars(ff)
@@ -357,9 +349,8 @@ glmSandwichTest <- function(models, subject_id,
     all_vars <- all_vars[!(all_vars %in% c("y", "offsets"))]
 
     ## Check which are within-variables
-    within_vars <- .get_within_vars(
-        all_vars,
-        .data = m$data, subject_id = subject_id
+    within_vars <- .get_within_vars(all_vars,
+        .data = mf, subject_id = subject_id
     )
 
     if (!length(within_vars)) {
