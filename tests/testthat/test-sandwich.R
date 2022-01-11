@@ -16,8 +16,6 @@ test_that("Vanilla glmSandwichTest() works", {
     pars <- out$params
     expect_identical(pars$type, "LiRedden")
     expect_identical(pars$subject_id, "subject_id")
-    expect_false(pars$cadjust)
-    expect_false(pars$fix)
 
     tab <- out$table
     expect_s3_class(tab, "data.frame")

@@ -10,9 +10,8 @@ glmSandwichTest(
   coef = NULL,
   contrast = NULL,
   type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
-  cadjust = FALSE,
-  fix = FALSE,
-  use_T = FALSE
+  use_T = FALSE,
+  ...
 )
 }
 \arguments{
@@ -22,7 +21,7 @@ glmSandwichTest(
 original data indicating subject IDs. When this is specified, observations
 are considered to be correlated within each subject and
 \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} is used to estimate the covariance matrix. When
-\code{subject_id = NULL} (the default), a heteroskedastic-consistent sandwich
+\code{subject_id = NULL}, a heteroskedastic-consistent sandwich
 estimator is used (equivalent to \code{\link[sandwich:vcovHC]{sandwich::vcovHC()}}).}
 
 \item{coef}{Character string or numeric scalar specifying the coefficient to
@@ -38,18 +37,10 @@ adjustment to be applied. Possible values are \code{"HC0"} to \code{"HC3"} or
 \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}}, for \code{"LiRedden"} see "Details" below. The default is
 to use \code{"LiRedden"}.}
 
-\item{cadjust}{Logical, whether to apply cluster bias adjustment. Where
-"cluster" refers to the subject-level grouping of the observations. Only
-relevant if \code{subject_id} is provided. See \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} for details.
-Default: \code{TRUE}. When using \code{type = "LiRedden"}, this will be set to
-\code{FALSE} internally.}
-
-\item{fix}{Logical, whether to fix the covariance matrix to be positive
-semi-definite in case it's not. See \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}} for details.
-Default: \code{FALSE}. Only relevant for \code{type = "HC2"} or \code{"HC3"}.}
-
 \item{use_T}{Logical, should a \eqn{t}-test be used to calculate the
 p-values? If \code{FALSE} (the default), will use a \eqn{z}-test.}
+
+\item{...}{Further arguments passed on to \code{\link[sandwich:vcovCL]{sandwich::vcovCL()}}.}
 }
 \value{
 A \code{data.frame} with a row for each gene and the following columns:

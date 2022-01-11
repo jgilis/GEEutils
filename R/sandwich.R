@@ -18,23 +18,17 @@
 #'   original data indicating subject IDs. When this is specified, observations
 #'   are considered to be correlated within each subject and
 #'   [sandwich::vcovCL()] is used to estimate the covariance matrix. When
-#'   `subject_id = NULL` (the default), a heteroskedastic-consistent sandwich
+#'   `subject_id = NULL`, a heteroskedastic-consistent sandwich
 #'   estimator is used (equivalent to [sandwich::vcovHC()]).
 #' @param type Character string specifying which type of small-sample bias
 #'   adjustment to be applied. Possible values are `"HC0"` to `"HC3"` or
 #'   `"LiRedden"`. For details on the `"HC*"` adjustments see
 #'   [sandwich::vcovCL()], for `"LiRedden"` see "Details" below. The default is
 #'   to use `"LiRedden"`.
-#' @param cadjust Logical, whether to apply cluster bias adjustment. Where
-#'   "cluster" refers to the subject-level grouping of the observations. Only
-#'   relevant if `subject_id` is provided. See [sandwich::vcovCL()] for details.
-#'   Default: `TRUE`. When using `type = "LiRedden"`, this will be set to
-#'   `FALSE` internally.
-#' @param fix Logical, whether to fix the covariance matrix to be positive
-#'   semi-definite in case it's not. See [sandwich::vcovCL()] for details.
-#'   Default: `FALSE`. Only relevant for `type = "HC2"` or `"HC3"`.
 #' @param use_T Logical, should a \eqn{t}-test be used to calculate the
 #'   p-values? If `FALSE` (the default), will use a \eqn{z}-test.
+#'
+#' @param ... Further arguments passed on to [sandwich::vcovCL()].
 #'
 #' @details
 #' ## Small sample size adjustments
@@ -99,8 +93,8 @@
 glmSandwichTest <- function(models, subject_id,
                             coef = NULL, contrast = NULL,
                             type = c("LiRedden", "HC0", "HC1", "HC2", "HC3"),
-                            cadjust = FALSE, fix = FALSE,
-                            use_T = FALSE) {
+                            use_T = FALSE,
+                            ...) {
 
     type <- match.arg(type)
 
@@ -130,7 +124,7 @@ glmSandwichTest <- function(models, subject_id,
 
     sandwich_out <- .get_beta_vars(
         models = models, coef = coef, contrast = contrast,
-        subject_id = subject_id, type = type, cadjust = cadjust, fix = fix
+        subject_id = subject_id, type = type, ...
     )
     sandwich_var <- sandwich_out$beta_vars
 
@@ -241,7 +235,7 @@ glmSandwichTest <- function(models, subject_id,
 }
 
 
-.get_beta_vars <- function(models, coef, contrast, subject_id, type, cadjust, fix) {
+.get_beta_vars <- function(models, coef, contrast, subject_id, type, ...) {
     adjust_LR <- FALSE
     if (type == "LiRedden") {
         type <- "HC0"
@@ -251,7 +245,6 @@ glmSandwichTest <- function(models, subject_id,
                 '\nFalling back to `type = "HC0"` without further adjustment.'
             )
         } else {
-            cadjust <- fix <- FALSE
             adjust_LR <- TRUE
             lr_adjustment <- .LR_adjustment(models[[1]], subject_id = subject_id)
         }
@@ -265,7 +258,7 @@ glmSandwichTest <- function(models, subject_id,
     beta_vars <- vapply(models, FUN = .glm_sandwich_var,
         contrast = contrast, coef = coef,
         subject_id = subject_id, type = type,
-        cadjust = cadjust, fix = fix,
+        ...,
         FUN.VALUE = numeric(1)  # expects just one coefficient or contrast!
     )
 
@@ -276,7 +269,7 @@ glmSandwichTest <- function(models, subject_id,
 
     list(
         beta_vars = beta_vars,
-        params = list(type = type, cadjust = cadjust, fix = fix)
+        params = list(type = type)
     )
 }
 
@@ -284,10 +277,10 @@ glmSandwichTest <- function(models, subject_id,
 ## Helper to compute sandwich variances of coefficient estimates for single model
 ## Returns diagonal elements of the covariance matrix V(beta)
 #' @importFrom sandwich vcovCL
-.glm_sandwich_var <- function(m, coef, contrast, subject_id, type, cadjust, fix) {
+.glm_sandwich_var <- function(m, coef, contrast, subject_id, type, ...) {
     v <- vcovCL(m,
         cluster = subject_id, sandwich = TRUE, type = type,
-        cadjust = cadjust, fix = fix
+        ...
     )
     if (!is.null(contrast)) {
         v <- crossprod(contrast, v %*% contrast)
