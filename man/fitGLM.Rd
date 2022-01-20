@@ -9,6 +9,7 @@ fitGLM(
   formula,
   family = c("poisson", "quasipoisson", "negbin"),
   offsets = "TMM",
+  prior_count = 0,
   ...
 )
 }
@@ -25,6 +26,8 @@ GLM. Currently supports \code{"poisson"}, \code{"quasipoisson"} and \code{"negbi
 
 \item{offsets}{Either a character string specifying which method to use to
 calculate offsets or a numeric vector providing the offsets.}
+
+\item{prior_count}{Prior count to be added to counts. Default: 0.}
 
 \item{...}{Further arguments passed on to \code{\link[stats:glm]{stats::glm()}} or \code{\link[MASS:glm.nb]{MASS::glm.nb()}}
 when \code{family = "negbin"}.}

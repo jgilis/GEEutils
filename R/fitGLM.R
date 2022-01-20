@@ -12,6 +12,7 @@
 #'   (negative binomial GLM, through [MASS::glm.nb()]).
 #' @param offsets Either a character string specifying which method to use to
 #'   calculate offsets or a numeric vector providing the offsets.
+#' @param prior_count Prior count to be added to counts. Default: 0.
 #' @param ... Further arguments passed on to [stats::glm()] or [MASS::glm.nb()]
 #'   when `family = "negbin"`.
 #'
@@ -39,7 +40,7 @@
 #' @importFrom stats as.formula
 fitGLM <- function(sce, formula,
                    family = c("poisson", "quasipoisson", "negbin"),
-                   offsets = "TMM",
+                   offsets = "TMM", prior_count = 0,
                    ...) {
 
     stopifnot(is(sce, "SummarizedExperiment"))
@@ -48,7 +49,7 @@ fitGLM <- function(sce, formula,
     family <- match.arg(family)
 
     ## Requires raw counts
-    Y <- counts(sce)
+    Y <- counts(sce) + prior_count
     cd <- as.data.frame(colData(sce))
 
     offsets <- .handle_offsets(Y = Y, offsets = offsets)
